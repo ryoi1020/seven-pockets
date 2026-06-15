@@ -1,4 +1,4 @@
-const CACHE_NAME = 'seven-pockets-v2';
+const CACHE_NAME = 'seven-pockets-v3';
 
 self.addEventListener('install', event => {
     event.waitUntil(
@@ -8,7 +8,8 @@ self.addEventListener('install', event => {
                 './index.html',
                 './manifest.json',
                 './icon-192.png',
-                './icon-512.png'
+                './icon-512.png',
+                './favicon.ico'
             ]).catch(() => {
                 // ネットワークエラーの場合はスキップ
             });
