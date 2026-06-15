@@ -31,7 +31,6 @@
             min-height: 100vh;
         }
         
-        /* ========== DESKTOP (1024px+) ========== */
         .sidebar {
             width: 280px;
             background: linear-gradient(135deg, #5B50C1 0%, #4A4199 100%);
@@ -62,7 +61,7 @@
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             border: 2px solid transparent;
         }
@@ -74,6 +73,16 @@
         .nav-item.active {
             background: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .nav-item-icon {
+            font-size: 18px;
+            margin-right: 10px;
+        }
+        
+        .nav-item-desc {
+            font-size: 11px;
+            opacity: 0.9;
         }
         
         .main-content {
@@ -88,7 +97,6 @@
             display: none;
         }
         
-        /* ========== TABLET (640px - 1024px) ========== */
         @media (max-width: 1024px) {
             .sidebar {
                 width: 240px;
@@ -106,51 +114,15 @@
             }
         }
         
-        /* ========== MOBILE (< 640px) ========== */
         @media (max-width: 640px) {
             .sidebar {
-                position: fixed;
-                width: 100%;
-                height: auto;
-                left: 0;
-                bottom: 0;
-                padding: 0;
-                border-radius: 16px 16px 0 0;
-                box-shadow: 0 -8px 24px rgba(91, 80, 193, 0.15);
                 display: none;
-            }
-            
-            .sidebar.mobile-open {
-                display: block;
-            }
-            
-            .sidebar-brand {
-                display: none;
-            }
-            
-            .sidebar-nav {
-                flex-direction: row;
-                gap: 0;
-                padding: 8px;
-            }
-            
-            .nav-item {
-                flex: 1;
-                padding: 12px 8px;
-                text-align: center;
-                font-size: 12px;
-                border-radius: 10px;
-                background: transparent;
-            }
-            
-            .nav-item.active {
-                background: rgba(255, 255, 255, 0.25);
             }
             
             .main-content {
                 margin-left: 0;
                 padding: 16px;
-                padding-bottom: 120px;
+                padding-bottom: 140px;
             }
             
             .bottom-nav {
@@ -164,28 +136,39 @@
                 color: white;
                 z-index: 99;
                 box-shadow: 0 -4px 16px rgba(91, 80, 193, 0.2);
+                padding: 8px 4px;
+                gap: 2px;
             }
             
             .bottom-nav-item {
-                padding: 12px 8px;
+                padding: 8px 4px;
                 text-align: center;
-                font-size: 11px;
                 cursor: pointer;
                 border-top: 2px solid transparent;
                 transition: all 0.2s ease;
-            }
-            
-            .bottom-nav-item:hover {
-                background: rgba(255, 255, 255, 0.1);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 2px;
             }
             
             .bottom-nav-item.active {
                 background: rgba(255, 255, 255, 0.15);
                 border-top-color: #06A77D;
             }
+            
+            .nav-item-icon {
+                font-size: 22px;
+                margin-right: 0;
+            }
+            
+            .nav-item-label {
+                font-size: 9px;
+                font-weight: 600;
+                line-height: 1.2;
+            }
         }
         
-        /* ========== COMMON STYLES ========== */
         .header {
             margin-bottom: 32px;
         }
@@ -200,22 +183,6 @@
             background-clip: text;
         }
         
-        .header p {
-            color: #718096;
-            font-size: 14px;
-        }
-        
-        @media (max-width: 640px) {
-            .header h1 {
-                font-size: 24px;
-            }
-            
-            .header {
-                margin-bottom: 24px;
-            }
-        }
-        
-        /* Summary Cards */
         .summary-section {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -223,18 +190,10 @@
             margin-bottom: 32px;
         }
         
-        @media (max-width: 1024px) {
-            .summary-section {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
-        }
-        
         @media (max-width: 640px) {
             .summary-section {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
-                margin-bottom: 24px;
             }
         }
         
@@ -244,25 +203,11 @@
             border-radius: 16px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
             border: 1px solid #e2e8f0;
-            transition: all 0.3s ease;
-        }
-        
-        .summary-card:hover {
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-            border-color: #cbd5e0;
-        }
-        
-        @media (max-width: 640px) {
-            .summary-card {
-                padding: 16px;
-            }
         }
         
         .summary-label {
             font-size: 12px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
             color: #718096;
             margin-bottom: 8px;
         }
@@ -270,14 +215,7 @@
         .summary-value {
             font-size: 28px;
             font-weight: 700;
-            line-height: 1.2;
             margin-bottom: 8px;
-        }
-        
-        @media (max-width: 640px) {
-            .summary-value {
-                font-size: 20px;
-            }
         }
         
         .summary-card.revenue .summary-value {
@@ -292,12 +230,6 @@
             color: #5B50C1;
         }
         
-        .summary-sub {
-            font-size: 11px;
-            color: #a0aec0;
-        }
-        
-        /* Form Section */
         .form-section {
             background: white;
             padding: 32px;
@@ -307,14 +239,6 @@
             margin-bottom: 32px;
         }
         
-        @media (max-width: 640px) {
-            .form-section {
-                padding: 20px;
-                margin-bottom: 24px;
-                border-radius: 12px;
-            }
-        }
-        
         .form-title {
             font-size: 18px;
             font-weight: 700;
@@ -322,31 +246,10 @@
             color: #1a202c;
         }
         
-        @media (max-width: 640px) {
-            .form-title {
-                font-size: 16px;
-                margin-bottom: 20px;
-            }
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 200px;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        
-        @media (max-width: 640px) {
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 12px;
-                margin-bottom: 20px;
-            }
-        }
-        
         .form-group {
             display: flex;
             flex-direction: column;
+            margin-bottom: 16px;
         }
         
         .form-label {
@@ -354,8 +257,6 @@
             font-weight: 600;
             margin-bottom: 8px;
             color: #4a5568;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
         }
         
         .form-control {
@@ -364,14 +265,6 @@
             border-radius: 10px;
             font-size: 14px;
             font-family: inherit;
-            transition: all 0.2s ease;
-        }
-        
-        @media (max-width: 640px) {
-            .form-control {
-                padding: 14px 12px;
-                font-size: 16px;
-            }
         }
         
         .form-control:focus {
@@ -380,7 +273,6 @@
             box-shadow: 0 0 0 3px rgba(91, 80, 193, 0.1);
         }
         
-        /* Buttons */
         .btn-primary {
             padding: 14px 24px;
             background: linear-gradient(135deg, #5B50C1 0%, #4A4199 100%);
@@ -391,39 +283,11 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(91, 80, 193, 0.3);
-        }
-        
-        @media (max-width: 640px) {
-            .btn-primary {
-                padding: 16px 20px;
-                font-size: 15px;
-            }
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(91, 80, 193, 0.4);
-        }
-        
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-        
-        .btn-secondary {
-            padding: 10px 16px;
-            background: #edf2f7;
-            color: #5B50C1;
-            border: 1px solid #cbd5e0;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-secondary:hover {
-            background: #e2e8f0;
         }
         
         .btn-danger {
@@ -435,7 +299,6 @@
             cursor: pointer;
             font-size: 12px;
             font-weight: 600;
-            transition: all 0.2s ease;
         }
         
         .btn-danger:hover {
@@ -443,7 +306,6 @@
             color: white;
         }
         
-        /* Calendar */
         .calendar-container {
             background: white;
             padding: 24px;
@@ -458,11 +320,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
-        }
-        
-        .calendar-nav {
-            display: flex;
-            gap: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .calendar-nav button {
@@ -473,6 +332,7 @@
             cursor: pointer;
             font-weight: 600;
             color: #5B50C1;
+            font-size: 12px;
         }
         
         .calendar-nav button:hover {
@@ -491,7 +351,6 @@
             font-size: 12px;
             color: #718096;
             padding: 12px 4px;
-            text-transform: uppercase;
         }
         
         .calendar-day {
@@ -501,21 +360,10 @@
             padding: 8px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s ease;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            font-size: 12px;
-        }
-        
-        .calendar-day:hover {
-            border-color: #cbd5e0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .calendar-day.other-month {
-            background: #f7fafc;
-            color: #a0aec0;
+            font-size: 11px;
         }
         
         .calendar-day.positive {
@@ -533,50 +381,26 @@
             border-color: #cbd5e0;
         }
         
+        .calendar-day.other-month {
+            background: #f7fafc;
+            color: #a0aec0;
+        }
+        
         .calendar-day-date {
             font-weight: 700;
         }
         
         .calendar-day-amount {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
         }
         
-        /* Alert */
-        .alert {
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            display: none;
+        .calendar-day-breakdown {
+            font-size: 9px;
+            color: #718096;
+            line-height: 1.1;
         }
         
-        .alert.success {
-            background: #c6f6d5;
-            color: #22543d;
-            border: 1px solid #9ae6b4;
-        }
-        
-        .alert.error {
-            background: #fed7d7;
-            color: #742a2a;
-            border: 1px solid #fc8787;
-        }
-        
-        .alert.show {
-            display: block;
-        }
-        
-        /* Content */
-        .content {
-            display: none;
-        }
-        
-        .content.active {
-            display: block;
-        }
-        
-        /* Tables */
         .table {
             width: 100%;
             border-collapse: collapse;
@@ -591,7 +415,6 @@
             font-size: 12px;
             color: #4a5568;
             border-bottom: 2px solid #e2e8f0;
-            text-transform: uppercase;
         }
         
         .table td {
@@ -599,107 +422,122 @@
             border-bottom: 1px solid #e2e8f0;
         }
         
-        .table tr:hover {
-            background: #f7fafc;
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: none;
+        }
+        
+        .alert.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .alert.show {
+            display: block;
+        }
+        
+        .content {
+            display: none;
+        }
+        
+        .content.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            padding-top: 24px;
+            border-top: 2px solid #e2e8f0;
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar (Desktop) -->
         <div class="sidebar">
             <div class="sidebar-brand">💰 Seven Pockets</div>
             <div class="sidebar-nav">
-                <div class="nav-item active" onclick="switchPage('dashboard')">📊 ダッシュボード</div>
-                <div class="nav-item" onclick="switchPage('calendar')">📅 カレンダー</div>
-                <div class="nav-item" onclick="switchPage('recurring')">🔄 定期収入</div>
-                <div class="nav-item" onclick="switchPage('targets')">🎯 目標値設定</div>
-                <div class="nav-item" onclick="switchPage('analysis')">📈 分析</div>
-                <div class="nav-item" onclick="switchPage('data')">💾 データ管理</div>
+                <div class="nav-item active" onclick="switchPage('dashboard')">
+                    <span class="nav-item-icon">📊</span>本日の記録<div class="nav-item-desc">売上・支出を入力</div>
+                </div>
+                <div class="nav-item" onclick="switchPage('calendar')">
+                    <span class="nav-item-icon">📅</span>月間カレンダー<div class="nav-item-desc">収支を視覚化</div>
+                </div>
+                <div class="nav-item" onclick="switchPage('recurring')">
+                    <span class="nav-item-icon">🔄</span>定期設定<div class="nav-item-desc">収入・支出の定期</div>
+                </div>
+                <div class="nav-item" onclick="switchPage('targets')">
+                    <span class="nav-item-icon">🎯</span>月間目標<div class="nav-item-desc">売上目標を設定</div>
+                </div>
+                <div class="nav-item" onclick="switchPage('data')">
+                    <span class="nav-item-icon">💾</span>データ管理<div class="nav-item-desc">バックアップ・復元</div>
+                </div>
             </div>
         </div>
         
-        <!-- Main Content -->
         <div class="main-content">
             <div id="message" class="alert"></div>
             
-            <!-- Dashboard Page -->
+            <!-- Dashboard -->
             <div id="dashboard" class="content active">
                 <div class="header">
                     <h1>セブンポケット</h1>
                     <p>7つの収益源を一元管理</p>
                 </div>
                 
-                <!-- Summary -->
                 <div class="summary-section">
                     <div class="summary-card revenue">
                         <div class="summary-label">本日の売上</div>
                         <div class="summary-value" id="totalRevenue">¥0</div>
-                        <div class="summary-sub">全事業合計</div>
                     </div>
                     <div class="summary-card expense">
                         <div class="summary-label">本日の支出</div>
                         <div class="summary-value" id="totalExpense">¥0</div>
-                        <div class="summary-sub">全カテゴリ合計</div>
                     </div>
                     <div class="summary-card profit">
                         <div class="summary-label">本日の利益</div>
                         <div class="summary-value" id="totalProfit">¥0</div>
-                        <div class="summary-sub">売上 - 支出</div>
                     </div>
                     <div class="summary-card profit">
                         <div class="summary-label">利益率</div>
                         <div class="summary-value" id="profitRate">0%</div>
-                        <div class="summary-sub">利益 / 売上</div>
                     </div>
                 </div>
                 
-                <!-- Input Form -->
                 <div class="form-section">
                     <div class="form-title">本日の記録</div>
-                    
                     <form onsubmit="handleSubmit(event)">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">売上（サービス）</label>
-                                <select id="serviceSelect" class="form-control">
-                                    <option value="1">愛しとーと</option>
-                                    <option value="2">児童手当</option>
-                                    <option value="3">GFEF貸付収益</option>
-                                    <option value="4">GFEF投資収益</option>
-                                    <option value="5">GFEFサブスク</option>
-                                    <option value="6">WAVE ORACLE</option>
-                                    <option value="7">ギャンブル投資</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">売上金額</label>
-                                <input type="number" id="revenueAmount" class="form-control" placeholder="0" step="1000">
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label">売上金額</label>
+                            <input type="number" id="revenueAmount" class="form-control" placeholder="0" step="1000">
                         </div>
                         
-                        <!-- Expense Items -->
-                        <div style="background: #f7fafc; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
-                            <div style="font-size: 13px; font-weight: 600; color: #4a5568; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.3px;">支出（複数追加可能）</div>
-                            <div id="expenseList"></div>
-                            <button type="button" class="btn-secondary" style="width: 100%; margin-top: 12px;" onclick="addExpenseItem()">+ もう1件追加</button>
+                        <div class="form-group">
+                            <label class="form-label">支出金額</label>
+                            <input type="number" id="expenseAmount" class="form-control" placeholder="0" step="100">
                         </div>
                         
-                        <button type="submit" class="btn-primary">本日を記録する</button>
+                        <button type="submit" class="btn-primary">記録する</button>
                     </form>
                 </div>
             </div>
             
-            <!-- Calendar Page -->
+            <!-- Calendar -->
             <div id="calendar" class="content">
                 <div class="header">
                     <h1>カレンダー</h1>
-                    <p>日々の収支を視覚化</p>
+                    <p>日々の収支を視覚化（定期分も自動反映）</p>
                 </div>
                 
                 <div class="calendar-container">
                     <div class="calendar-header">
-                        <h2 id="calendarMonth" style="font-size: 20px; font-weight: 700;"></h2>
+                        <h2 id="calendarMonth" style="font-size: 20px; font-weight: 700; margin: 0;"></h2>
                         <div class="calendar-nav">
                             <button onclick="prevMonth()">← 前月</button>
                             <button onclick="todayMonth()">今月</button>
@@ -712,11 +550,11 @@
                 
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px;">
                     <div style="background: #c6f6d5; padding: 16px; border-radius: 10px; text-align: center;">
-                        <div style="font-size: 12px; color: #22543d; font-weight: 600;">プラス</div>
+                        <div style="font-size: 12px; color: #22543d; font-weight: 600;">プラス日数</div>
                         <div id="calendarPositive" style="font-size: 18px; font-weight: 700; color: #06A77D;"></div>
                     </div>
                     <div style="background: #fed7d7; padding: 16px; border-radius: 10px; text-align: center;">
-                        <div style="font-size: 12px; color: #742a2a; font-weight: 600;">マイナス</div>
+                        <div style="font-size: 12px; color: #742a2a; font-weight: 600;">マイナス日数</div>
                         <div id="calendarNegative" style="font-size: 18px; font-weight: 700; color: #FF6B35;"></div>
                     </div>
                     <div style="background: #edf2f7; padding: 16px; border-radius: 10px; text-align: center;">
@@ -726,125 +564,127 @@
                 </div>
             </div>
             
-            <!-- Recurring Income Page -->
+            <!-- Recurring -->
             <div id="recurring" class="content">
                 <div class="header">
-                    <h1>定期収入管理</h1>
-                    <p>月額固定の収入を設定</p>
+                    <h1>定期設定</h1>
+                    <p>毎月の定期収入・支出を管理</p>
                 </div>
                 
                 <div class="form-section">
-                    <div class="form-title">定期収入を追加</div>
-                    
-                    <form onsubmit="handleRecurringSubmit(event)">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">サービス名</label>
-                                <input type="text" id="recurringName" class="form-control" placeholder="例：基本給">
-                            </div>
+                    <div class="form-title">📈 定期収入を追加</div>
+                    <form onsubmit="handleRecurringIncomeSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">名前</label>
+                            <input type="text" id="recurringIncomeName" class="form-control" placeholder="例：基本給、児童手当">
                         </div>
                         
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">金額</label>
-                                <input type="number" id="recurringAmount" class="form-control" placeholder="0" step="1000">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">周期</label>
-                                <select id="recurringCycle" class="form-control">
-                                    <option value="monthly">月次</option>
-                                    <option value="weekly">週次</option>
-                                    <option value="daily">日次</option>
-                                </select>
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label">金額</label>
+                            <input type="number" id="recurringIncomeAmount" class="form-control" placeholder="0" step="1000">
                         </div>
                         
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">開始日（月内の日数）</label>
-                                <input type="number" id="recurringDate" class="form-control" placeholder="1" min="1" max="31">
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label">周期</label>
+                            <select id="recurringIncomeCycle" class="form-control">
+                                <option value="monthly">月次</option>
+                                <option value="weekly">週次</option>
+                                <option value="daily">日次</option>
+                            </select>
                         </div>
                         
-                        <button type="submit" class="btn-primary">追加</button>
+                        <div class="form-group">
+                            <label class="form-label">開始日（1-31）</label>
+                            <input type="number" id="recurringIncomeDate" class="form-control" placeholder="1" min="1" max="31">
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">定期収入を追加</button>
                     </form>
                 </div>
                 
                 <div class="form-section">
-                    <div class="form-title">現在の定期収入</div>
+                    <div class="form-title">定期収入一覧</div>
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>名称</th>
+                                <th>名前</th>
                                 <th>金額</th>
                                 <th>周期</th>
                                 <th>開始日</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
-                        <tbody id="recurringList"></tbody>
+                        <tbody id="recurringIncomeList"></tbody>
+                    </table>
+                </div>
+                
+                <div class="form-section">
+                    <div class="form-title">📉 定期支出を追加</div>
+                    <form onsubmit="handleRecurringExpenseSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">名前</label>
+                            <input type="text" id="recurringExpenseName" class="form-control" placeholder="例：家賃、保険">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">金額</label>
+                            <input type="number" id="recurringExpenseAmount" class="form-control" placeholder="0" step="1000">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">周期</label>
+                            <select id="recurringExpenseCycle" class="form-control">
+                                <option value="monthly">月次</option>
+                                <option value="weekly">週次</option>
+                                <option value="daily">日次</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">開始日（1-31）</label>
+                            <input type="number" id="recurringExpenseDate" class="form-control" placeholder="15" min="1" max="31">
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">定期支出を追加</button>
+                    </form>
+                </div>
+                
+                <div class="form-section">
+                    <div class="form-title">定期支出一覧</div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>名前</th>
+                                <th>金額</th>
+                                <th>周期</th>
+                                <th>開始日</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recurringExpenseList"></tbody>
                     </table>
                 </div>
             </div>
             
-            <!-- Targets Page -->
+            <!-- Targets -->
             <div id="targets" class="content">
                 <div class="header">
-                    <h1>目標値設定</h1>
-                    <p>月間目標とKPIを管理</p>
+                    <h1>月間目標</h1>
+                    <p>売上目標を設定</p>
                 </div>
                 
                 <div class="form-section">
                     <form onsubmit="handleTargetSubmit(event)">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">サービス</label>
-                                <select id="targetService" class="form-control">
-                                    <option value="1">愛しとーと</option>
-                                    <option value="2">児童手当</option>
-                                    <option value="3">GFEF貸付収益</option>
-                                    <option value="4">GFEF投資収益</option>
-                                    <option value="5">GFEFサブスク</option>
-                                    <option value="6">WAVE ORACLE</option>
-                                    <option value="7">ギャンブル投資</option>
-                                </select>
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label">月間売上目標</label>
+                            <input type="number" id="targetRevenue" class="form-control" placeholder="0" step="10000">
                         </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">月間売上目標</label>
-                                <input type="number" id="targetRevenue" class="form-control" placeholder="0" step="10000">
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">KPI名</label>
-                                <input type="text" id="targetKpiName" class="form-control" placeholder="例：ユーザー数">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">KPI値</label>
-                                <input type="number" id="targetKpiValue" class="form-control" placeholder="0">
-                            </div>
-                        </div>
-                        
                         <button type="submit" class="btn-primary">保存</button>
                     </form>
                 </div>
             </div>
             
-            <!-- Analysis Page -->
-            <div id="analysis" class="content">
-                <div class="header">
-                    <h1>サービス別分析</h1>
-                    <p>各事業の詳細を確認</p>
-                </div>
-                
-                <div id="analysisContent"></div>
-            </div>
-            
-            <!-- Data Management Page -->
+            <!-- Data -->
             <div id="data" class="content">
                 <div class="header">
                     <h1>データ管理</h1>
@@ -853,74 +693,63 @@
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
                     <div class="form-section">
-                        <div class="form-title">バックアップ</div>
-                        <p style="color: #718096; font-size: 13px; margin-bottom: 16px;">すべてのデータをダウンロードします</p>
-                        <button class="btn-primary" onclick="exportData()">データをエクスポート</button>
+                        <div class="form-title">エクスポート</div>
+                        <p style="color: #718096; font-size: 13px; margin-bottom: 16px;">データをダウンロード</p>
+                        <button class="btn-primary" onclick="exportData()">JSONをダウンロード</button>
                     </div>
                     
                     <div class="form-section">
-                        <div class="form-title">復元</div>
+                        <div class="form-title">インポート</div>
                         <div class="form-group">
                             <label class="form-label">JSONを貼り付け</label>
-                            <textarea id="importText" class="form-control" style="min-height: 120px; font-family: monospace; font-size: 12px;"></textarea>
+                            <textarea id="importText" class="form-control" style="min-height: 100px; font-family: monospace; font-size: 12px;"></textarea>
                         </div>
-                        <button class="btn-primary" onclick="importData()">データをインポート</button>
+                        <button class="btn-primary" onclick="importData()">復元</button>
                     </div>
-                </div>
-                
-                <div class="form-section" style="background: #fed7d7; border-color: #fc8787; margin-top: 24px;">
-                    <div class="form-title" style="color: #742a2a;">危険ゾーン</div>
-                    <button class="btn-primary" style="background: #fc8787; box-shadow: 0 4px 12px rgba(252, 135, 135, 0.3);" onclick="clearAllData()">すべてのデータを削除</button>
-                    <p style="color: #742a2a; font-size: 12px; margin-top: 12px;">この操作は取り消せません</p>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Bottom Navigation (Mobile) -->
     <div class="bottom-nav" id="bottomNav">
-        <div class="bottom-nav-item active" onclick="switchPage('dashboard')">📊</div>
-        <div class="bottom-nav-item" onclick="switchPage('calendar')">📅</div>
-        <div class="bottom-nav-item" onclick="switchPage('recurring')">🔄</div>
-        <div class="bottom-nav-item" onclick="switchPage('targets')">🎯</div>
-        <div class="bottom-nav-item" onclick="switchPage('data')">💾</div>
+        <div class="bottom-nav-item active" onclick="switchPage('dashboard')">
+            <div class="nav-item-icon">📊</div>
+            <div class="nav-item-label">本日の<br>記録</div>
+        </div>
+        <div class="bottom-nav-item" onclick="switchPage('calendar')">
+            <div class="nav-item-icon">📅</div>
+            <div class="nav-item-label">カレン<br>ダー</div>
+        </div>
+        <div class="bottom-nav-item" onclick="switchPage('recurring')">
+            <div class="nav-item-icon">🔄</div>
+            <div class="nav-item-label">定期<br>設定</div>
+        </div>
+        <div class="bottom-nav-item" onclick="switchPage('targets')">
+            <div class="nav-item-icon">🎯</div>
+            <div class="nav-item-label">月間<br>目標</div>
+        </div>
+        <div class="bottom-nav-item" onclick="switchPage('data')">
+            <div class="nav-item-icon">💾</div>
+            <div class="nav-item-label">データ<br>管理</div>
+        </div>
     </div>
     
     <script>
-        // Service Worker登録
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./service-worker.js').then(() => {
-                console.log('Service Worker registered');
-            }).catch((error) => {
-                console.log('Service Worker registration failed:', error);
-            });
+            navigator.serviceWorker.register('./service-worker.js').catch(() => {});
         }
-        
-        const SERVICES = [
-            { id: '1', name: '愛しとーと', defaultTarget: 530000 },
-            { id: '2', name: '児童手当', defaultTarget: 80000 },
-            { id: '3', name: 'GFEF貸付収益', defaultTarget: 16000 },
-            { id: '4', name: 'GFEF投資収益', defaultTarget: 60000 },
-            { id: '5', name: 'GFEFサブスク', defaultTarget: 370000 },
-            { id: '6', name: 'WAVE ORACLE', defaultTarget: 0 },
-            { id: '7', name: 'ギャンブル投資', defaultTarget: 0 }
-        ];
         
         let currentCalendarDate = new Date();
         
         const Storage = {
-            getRevenueToday: () => JSON.parse(localStorage.getItem('revenue_today') || '{}'),
-            setRevenueToday: (data) => localStorage.setItem('revenue_today', JSON.stringify(data)),
-            getExpensesToday: () => JSON.parse(localStorage.getItem('expenses_today') || '{}'),
-            setExpensesToday: (data) => localStorage.setItem('expenses_today', JSON.stringify(data)),
-            getCategories: () => JSON.parse(localStorage.getItem('expense_categories') || '[]'),
-            setCategories: (data) => localStorage.setItem('expense_categories', JSON.stringify(data)),
-            getTargets: () => JSON.parse(localStorage.getItem('targets') || '{}'),
-            setTargets: (data) => localStorage.setItem('targets', JSON.stringify(data)),
             getDailyHistory: () => JSON.parse(localStorage.getItem('daily_history') || '{}'),
             setDailyHistory: (data) => localStorage.setItem('daily_history', JSON.stringify(data)),
             getRecurringIncome: () => JSON.parse(localStorage.getItem('recurring_income') || '[]'),
             setRecurringIncome: (data) => localStorage.setItem('recurring_income', JSON.stringify(data)),
+            getRecurringExpense: () => JSON.parse(localStorage.getItem('recurring_expense') || '[]'),
+            setRecurringExpense: (data) => localStorage.setItem('recurring_expense', JSON.stringify(data)),
+            getTargets: () => JSON.parse(localStorage.getItem('targets') || '{}'),
+            setTargets: (data) => localStorage.setItem('targets', JSON.stringify(data)),
         };
         
         function formatCurrency(value) {
@@ -931,27 +760,68 @@
             return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
         }
         
-        function showMessage(msg, type = 'success') {
+        function showMessage(msg) {
             const alert = document.getElementById('message');
             alert.textContent = msg;
-            alert.className = 'alert show ' + type;
+            alert.className = 'alert show success';
             setTimeout(() => alert.classList.remove('show'), 3000);
+        }
+        
+        function getRecurringForDate(date) {
+            const dateNum = date.getDate();
+            const incomes = Storage.getRecurringIncome();
+            const expenses = Storage.getRecurringExpense();
+            
+            let totalRecurringRevenue = 0;
+            let totalRecurringExpense = 0;
+            
+            incomes.forEach(item => {
+                if (item.cycle === 'monthly' && item.date === dateNum) {
+                    totalRecurringRevenue += item.amount;
+                }
+            });
+            
+            expenses.forEach(item => {
+                if (item.cycle === 'monthly' && item.date === dateNum) {
+                    totalRecurringExpense += item.amount;
+                }
+            });
+            
+            return { revenue: totalRecurringRevenue, expense: totalRecurringExpense };
         }
         
         function getDayBalance(date) {
             const dateStr = formatDate(date);
             const history = Storage.getDailyHistory();
             const record = history[dateStr] || { revenue: 0, expense: 0 };
-            return record.revenue - record.expense;
+            const recurring = getRecurringForDate(date);
+            
+            const totalRevenue = record.revenue + recurring.revenue;
+            const totalExpense = record.expense + recurring.expense;
+            
+            return totalRevenue - totalExpense;
+        }
+        
+        function getDayDetails(date) {
+            const dateStr = formatDate(date);
+            const history = Storage.getDailyHistory();
+            const record = history[dateStr] || { revenue: 0, expense: 0 };
+            const recurring = getRecurringForDate(date);
+            
+            const totalRevenue = record.revenue + recurring.revenue;
+            const totalExpense = record.expense + recurring.expense;
+            
+            return { revenue: totalRevenue, expense: totalExpense };
         }
         
         function updateDisplay() {
-            const revenueToday = Storage.getRevenueToday();
-            const expensesToday = Storage.getExpensesToday();
-            const targets = Storage.getTargets();
+            const today = formatDate(new Date());
+            const history = Storage.getDailyHistory();
+            const record = history[today] || { revenue: 0, expense: 0 };
+            const recurring = getRecurringForDate(new Date());
             
-            const totalRevenue = Object.values(revenueToday).reduce((a, b) => a + (Number(b) || 0), 0);
-            const totalExpense = Object.values(expensesToday).reduce((a, b) => a + (Number(b) || 0), 0);
+            const totalRevenue = record.revenue + recurring.revenue;
+            const totalExpense = record.expense + recurring.expense;
             const profit = totalRevenue - totalExpense;
             
             document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
@@ -967,7 +837,6 @@
             document.getElementById('calendarMonth').textContent = year + '年' + (month + 1) + '月';
             
             const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
             const startDate = new Date(firstDay);
             startDate.setDate(startDate.getDate() - firstDay.getDay());
             
@@ -985,6 +854,7 @@
                 
                 const isOtherMonth = date.getMonth() !== month;
                 const balance = getDayBalance(date);
+                const details = getDayDetails(date);
                 let statusClass = 'neutral';
                 
                 if (!isOtherMonth) {
@@ -999,9 +869,15 @@
                     }
                 }
                 
+                let breakdown = '';
+                if (details.revenue > 0 || details.expense > 0) {
+                    breakdown = `<div class="calendar-day-breakdown">${details.revenue > 0 ? '+' + Math.floor(details.revenue/10000) + '万' : ''}${details.expense > 0 ? '-' + Math.floor(details.expense/10000) + '万' : ''}</div>`;
+                }
+                
                 html += `
                     <div class="calendar-day ${statusClass} ${isOtherMonth ? 'other-month' : ''}">
                         <div class="calendar-day-date">${date.getDate()}</div>
+                        ${breakdown}
                         <div class="calendar-day-amount">${balance > 0 ? '+' : ''}${formatCurrency(balance)}</div>
                     </div>
                 `;
@@ -1013,94 +889,69 @@
             document.getElementById('calendarNeutral').textContent = neutralCount + '日';
         }
         
-        function updateRecurringList() {
-            const recurring = Storage.getRecurringIncome();
-            let html = '';
+        function updateRecurringLists() {
+            const incomes = Storage.getRecurringIncome();
+            const expenses = Storage.getRecurringExpense();
             
-            recurring.forEach((item, idx) => {
-                html += `
+            let incomeHtml = '';
+            incomes.forEach((item, idx) => {
+                incomeHtml += `
                     <tr>
                         <td>${item.name}</td>
                         <td>${formatCurrency(item.amount)}</td>
                         <td>${item.cycle === 'monthly' ? '月次' : item.cycle === 'weekly' ? '週次' : '日次'}</td>
                         <td>${item.date}日</td>
-                        <td><button class="btn-danger" onclick="deleteRecurring(${idx})">削除</button></td>
+                        <td><button type="button" class="btn-danger" onclick="deleteRecurringIncome(${idx})">削除</button></td>
                     </tr>
                 `;
             });
+            document.getElementById('recurringIncomeList').innerHTML = incomeHtml || '<tr><td colspan="5" style="text-align: center; color: #a0aec0;">登録済みの定期収入がありません</td></tr>';
             
-            document.getElementById('recurringList').innerHTML = html || '<tr><td colspan="5" style="text-align: center; color: #a0aec0;">定期収入はありません</td></tr>';
-        }
-        
-        function addExpenseItem() {
-            const categories = Storage.getCategories();
-            const list = document.getElementById('expenseList');
-            
-            const itemHtml = `
-                <div style="display: grid; grid-template-columns: 1fr 150px 40px; gap: 12px; margin-bottom: 12px; align-items: center;">
-                    <select class="form-control expense-category">
-                        <option value="">カテゴリ選択</option>
-                        ${categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
-                    </select>
-                    <input type="number" class="form-control expense-amount" placeholder="金額" step="100">
-                    <button type="button" class="btn-danger" onclick="this.parentElement.remove()">削除</button>
-                </div>
-            `;
-            
-            const div = document.createElement('div');
-            div.innerHTML = itemHtml;
-            list.insertBefore(div.firstElementChild, list.lastElementChild || undefined);
+            let expenseHtml = '';
+            expenses.forEach((item, idx) => {
+                expenseHtml += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${formatCurrency(item.amount)}</td>
+                        <td>${item.cycle === 'monthly' ? '月次' : item.cycle === 'weekly' ? '週次' : '日次'}</td>
+                        <td>${item.date}日</td>
+                        <td><button type="button" class="btn-danger" onclick="deleteRecurringExpense(${idx})">削除</button></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('recurringExpenseList').innerHTML = expenseHtml || '<tr><td colspan="5" style="text-align: center; color: #a0aec0;">登録済みの定期支出がありません</td></tr>';
         }
         
         function handleSubmit(e) {
             e.preventDefault();
             
-            const serviceId = document.getElementById('serviceSelect').value;
-            const amount = document.getElementById('revenueAmount').value;
-            
-            if (!amount) {
-                showMessage('売上金額を入力してください', 'error');
-                return;
-            }
+            const revenue = Number(document.getElementById('revenueAmount').value) || 0;
+            const expense = Number(document.getElementById('expenseAmount').value) || 0;
             
             const today = formatDate(new Date());
             const history = Storage.getDailyHistory();
             
-            if (!history[today]) {
-                history[today] = { revenue: 0, expense: 0 };
-            }
-            
-            history[today].revenue += Number(amount);
-            
-            document.querySelectorAll('.expense-item').forEach(item => {
-                const catId = item.querySelector('.expense-category').value;
-                const amt = item.querySelector('.expense-amount').value;
-                if (catId && amt) {
-                    history[today].expense += Number(amt);
-                }
-            });
-            
+            history[today] = { revenue, expense };
             Storage.setDailyHistory(history);
             
             document.getElementById('revenueAmount').value = '';
-            document.getElementById('expenseList').innerHTML = '';
-            addExpenseItem();
+            document.getElementById('expenseAmount').value = '';
             
             updateDisplay();
             updateCalendar();
-            showMessage('本日の記録を保存しました');
+            showMessage('記録を保存しました');
         }
         
-        function handleRecurringSubmit(e) {
+        function handleRecurringIncomeSubmit(e) {
             e.preventDefault();
             
-            const name = document.getElementById('recurringName').value;
-            const amount = document.getElementById('recurringAmount').value;
-            const cycle = document.getElementById('recurringCycle').value;
-            const date = document.getElementById('recurringDate').value;
+            const name = document.getElementById('recurringIncomeName').value;
+            const amount = document.getElementById('recurringIncomeAmount').value;
+            const cycle = document.getElementById('recurringIncomeCycle').value;
+            const date = document.getElementById('recurringIncomeDate').value;
             
             if (!name || !amount || !date) {
-                showMessage('すべて入力してください', 'error');
+                alert('すべて入力してください');
                 return;
             }
             
@@ -1108,41 +959,73 @@
             recurring.push({ name, amount: Number(amount), cycle, date: Number(date) });
             Storage.setRecurringIncome(recurring);
             
-            document.getElementById('recurringName').value = '';
-            document.getElementById('recurringAmount').value = '';
-            document.getElementById('recurringDate').value = '1';
+            document.getElementById('recurringIncomeName').value = '';
+            document.getElementById('recurringIncomeAmount').value = '';
+            document.getElementById('recurringIncomeDate').value = '1';
             
-            updateRecurringList();
+            updateRecurringLists();
+            updateDisplay();
+            updateCalendar();
             showMessage('定期収入を追加しました');
         }
         
-        function deleteRecurring(idx) {
+        function handleRecurringExpenseSubmit(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('recurringExpenseName').value;
+            const amount = document.getElementById('recurringExpenseAmount').value;
+            const cycle = document.getElementById('recurringExpenseCycle').value;
+            const date = document.getElementById('recurringExpenseDate').value;
+            
+            if (!name || !amount || !date) {
+                alert('すべて入力してください');
+                return;
+            }
+            
+            const recurring = Storage.getRecurringExpense();
+            recurring.push({ name, amount: Number(amount), cycle, date: Number(date) });
+            Storage.setRecurringExpense(recurring);
+            
+            document.getElementById('recurringExpenseName').value = '';
+            document.getElementById('recurringExpenseAmount').value = '';
+            document.getElementById('recurringExpenseDate').value = '15';
+            
+            updateRecurringLists();
+            updateDisplay();
+            updateCalendar();
+            showMessage('定期支出を追加しました');
+        }
+        
+        function deleteRecurringIncome(idx) {
             if (confirm('削除しますか？')) {
                 const recurring = Storage.getRecurringIncome();
                 recurring.splice(idx, 1);
                 Storage.setRecurringIncome(recurring);
-                updateRecurringList();
+                updateRecurringLists();
+                updateDisplay();
+                updateCalendar();
+                showMessage('削除しました');
+            }
+        }
+        
+        function deleteRecurringExpense(idx) {
+            if (confirm('削除しますか？')) {
+                const recurring = Storage.getRecurringExpense();
+                recurring.splice(idx, 1);
+                Storage.setRecurringExpense(recurring);
+                updateRecurringLists();
+                updateDisplay();
+                updateCalendar();
                 showMessage('削除しました');
             }
         }
         
         function handleTargetSubmit(e) {
             e.preventDefault();
-            
-            const serviceId = document.getElementById('targetService').value;
             const revenue = document.getElementById('targetRevenue').value;
-            const kpiName = document.getElementById('targetKpiName').value;
-            const kpiValue = document.getElementById('targetKpiValue').value;
-            
             const targets = Storage.getTargets();
-            targets[serviceId] = {
-                revenue: revenue ? Number(revenue) : null,
-                kpiName: kpiName,
-                kpiValue: kpiValue ? Number(kpiValue) : null
-            };
+            targets.monthly = Number(revenue);
             Storage.setTargets(targets);
-            
-            updateDisplay();
             showMessage('目標値を保存しました');
         }
         
@@ -1168,7 +1051,7 @@
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
             
-            const pages = ['dashboard', 'calendar', 'recurring', 'targets', 'analysis', 'data'];
+            const pages = ['dashboard', 'calendar', 'recurring', 'targets', 'data'];
             const pageIndex = pages.indexOf(pageId);
             
             if (pageIndex >= 0) {
@@ -1183,7 +1066,7 @@
                 updateCalendar();
             }
             if (pageId === 'recurring') {
-                updateRecurringList();
+                updateRecurringLists();
             }
         }
         
@@ -1191,6 +1074,7 @@
             const data = {
                 daily_history: Storage.getDailyHistory(),
                 recurring_income: Storage.getRecurringIncome(),
+                recurring_expense: Storage.getRecurringExpense(),
                 targets: Storage.getTargets(),
                 exported_at: new Date().toISOString()
             };
@@ -1201,13 +1085,13 @@
             a.href = url;
             a.download = 'seven-pockets-' + new Date().toISOString().slice(0, 10) + '.json';
             a.click();
-            showMessage('データをエクスポートしました');
+            showMessage('ダウンロードしました');
         }
         
         function importData() {
             const json = document.getElementById('importText').value;
             if (!json.trim()) {
-                showMessage('JSONを貼り付けてください', 'error');
+                alert('JSONを貼り付けてください');
                 return;
             }
             
@@ -1215,28 +1099,20 @@
                 const data = JSON.parse(json);
                 localStorage.setItem('daily_history', JSON.stringify(data.daily_history || {}));
                 localStorage.setItem('recurring_income', JSON.stringify(data.recurring_income || []));
+                localStorage.setItem('recurring_expense', JSON.stringify(data.recurring_expense || []));
                 localStorage.setItem('targets', JSON.stringify(data.targets || {}));
                 
                 updateDisplay();
-                showMessage('データをインポートしました');
+                showMessage('復元しました');
                 setTimeout(() => location.reload(), 1000);
             } catch (e) {
-                showMessage('JSONが無効です', 'error');
+                alert('JSONが無効です');
             }
         }
         
-        function clearAllData() {
-            if (confirm('本当にすべてのデータを削除しますか？')) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-        
-        // Initialize
         window.addEventListener('DOMContentLoaded', () => {
-            addExpenseItem();
             updateDisplay();
-            updateRecurringList();
+            updateRecurringLists();
         });
     </script>
 </body>
