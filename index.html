@@ -193,7 +193,8 @@
         @media (max-width: 640px) {
             .summary-section {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
+                gap: 12px;
+                margin-bottom: 20px;
             }
         }
         
@@ -205,6 +206,13 @@
             border: 1px solid #e2e8f0;
         }
         
+        @media (max-width: 640px) {
+            .summary-card {
+                padding: 16px;
+                border-radius: 12px;
+            }
+        }
+        
         .summary-label {
             font-size: 12px;
             font-weight: 600;
@@ -212,10 +220,24 @@
             margin-bottom: 8px;
         }
         
+        @media (max-width: 640px) {
+            .summary-label {
+                font-size: 11px;
+                margin-bottom: 6px;
+            }
+        }
+        
         .summary-value {
             font-size: 28px;
             font-weight: 700;
             margin-bottom: 8px;
+        }
+        
+        @media (max-width: 640px) {
+            .summary-value {
+                font-size: 20px;
+                margin-bottom: 4px;
+            }
         }
         
         .summary-card.revenue .summary-value {
@@ -239,11 +261,26 @@
             margin-bottom: 32px;
         }
         
+        @media (max-width: 640px) {
+            .form-section {
+                padding: 20px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+            }
+        }
+        
         .form-title {
             font-size: 18px;
             font-weight: 700;
             margin-bottom: 24px;
             color: #1a202c;
+        }
+        
+        @media (max-width: 640px) {
+            .form-title {
+                font-size: 16px;
+                margin-bottom: 16px;
+            }
         }
         
         .form-group {
@@ -267,6 +304,13 @@
             font-family: inherit;
         }
         
+        @media (max-width: 640px) {
+            .form-control {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+        }
+        
         .form-control:focus {
             outline: none;
             border-color: #5B50C1;
@@ -283,6 +327,13 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
+        }
+        
+        @media (max-width: 640px) {
+            .btn-primary {
+                padding: 12px 16px;
+                font-size: 13px;
+            }
         }
         
         .btn-primary:hover {
@@ -315,6 +366,14 @@
             margin-bottom: 32px;
         }
         
+        @media (max-width: 640px) {
+            .calendar-container {
+                padding: 16px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+            }
+        }
+        
         .calendar-header {
             display: flex;
             justify-content: space-between;
@@ -322,6 +381,12 @@
             margin-bottom: 24px;
             flex-wrap: wrap;
             gap: 10px;
+        }
+        
+        @media (max-width: 640px) {
+            .calendar-header {
+                margin-bottom: 16px;
+            }
         }
         
         .calendar-nav button {
@@ -335,6 +400,13 @@
             font-size: 12px;
         }
         
+        @media (max-width: 640px) {
+            .calendar-nav button {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+        }
+        
         .calendar-nav button:hover {
             background: #e2e8f0;
         }
@@ -342,7 +414,13 @@
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
+            gap: 6px;
+        }
+        
+        @media (max-width: 640px) {
+            .calendar-grid {
+                gap: 4px;
+            }
         }
         
         .calendar-day-header {
@@ -353,58 +431,140 @@
             padding: 12px 4px;
         }
         
+        @media (max-width: 640px) {
+            .calendar-day-header {
+                font-size: 11px;
+                padding: 8px 2px;
+            }
+        }
+        
         .calendar-day {
             aspect-ratio: 1;
             border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 8px;
+            border-radius: 12px;
+            padding: 6px;
             text-align: center;
             cursor: pointer;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
+            align-items: center;
             font-size: 11px;
+            gap: 2px;
+        }
+        
+        @media (max-width: 640px) {
+            .calendar-day {
+                padding: 4px;
+                border-radius: 8px;
+                font-size: 10px;
+            }
         }
         
         .calendar-day.positive {
-            background: #c6f6d5;
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
             border-color: #9ae6b4;
         }
         
         .calendar-day.negative {
-            background: #fed7d7;
+            background: linear-gradient(135deg, #fed7d7 0%, #fc8787 100%);
             border-color: #fc8787;
         }
         
         .calendar-day.neutral {
-            background: #edf2f7;
+            background: #f0f4f8;
             border-color: #cbd5e0;
         }
         
         .calendar-day.other-month {
-            background: #f7fafc;
-            color: #a0aec0;
+            background: #fafbfc;
+            color: #cbd5e0;
+            opacity: 0.5;
         }
         
         .calendar-day-date {
             font-weight: 700;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 640px) {
+            .calendar-day-date {
+                font-size: 11px;
+            }
         }
         
         .calendar-day-amount {
-            font-size: 10px;
-            font-weight: 600;
+            font-size: 9px;
+            font-weight: 700;
         }
         
-        .calendar-day-breakdown {
-            font-size: 9px;
-            color: #718096;
-            line-height: 1.1;
+        @media (max-width: 640px) {
+            .calendar-day-amount {
+                font-size: 8px;
+            }
+        }
+        
+        .calendar-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 640px) {
+            .calendar-stats {
+                gap: 8px;
+                margin-top: 16px;
+            }
+        }
+        
+        .calendar-stat {
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        @media (max-width: 640px) {
+            .calendar-stat {
+                padding: 10px;
+                border-radius: 10px;
+            }
+        }
+        
+        .calendar-stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        @media (max-width: 640px) {
+            .calendar-stat-label {
+                font-size: 10px;
+            }
+        }
+        
+        .calendar-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        @media (max-width: 640px) {
+            .calendar-stat-value {
+                font-size: 16px;
+            }
         }
         
         .table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 24px;
+            font-size: 13px;
+        }
+        
+        @media (max-width: 640px) {
+            .table {
+                font-size: 12px;
+            }
         }
         
         .table th {
@@ -417,9 +577,22 @@
             border-bottom: 2px solid #e2e8f0;
         }
         
+        @media (max-width: 640px) {
+            .table th {
+                padding: 10px;
+                font-size: 11px;
+            }
+        }
+        
         .table td {
             padding: 12px;
             border-bottom: 1px solid #e2e8f0;
+        }
+        
+        @media (max-width: 640px) {
+            .table td {
+                padding: 10px;
+            }
         }
         
         .alert {
@@ -448,13 +621,17 @@
             display: block;
         }
         
-        .section-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-top: 32px;
-            margin-bottom: 16px;
-            padding-top: 24px;
-            border-top: 2px solid #e2e8f0;
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        
+        @media (max-width: 640px) {
+            .data-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
         }
     </style>
 </head>
@@ -493,15 +670,15 @@
                 
                 <div class="summary-section">
                     <div class="summary-card revenue">
-                        <div class="summary-label">本日の売上</div>
+                        <div class="summary-label">今月の売上</div>
                         <div class="summary-value" id="totalRevenue">¥0</div>
                     </div>
                     <div class="summary-card expense">
-                        <div class="summary-label">本日の支出</div>
+                        <div class="summary-label">今月の支出</div>
                         <div class="summary-value" id="totalExpense">¥0</div>
                     </div>
                     <div class="summary-card profit">
-                        <div class="summary-label">本日の利益</div>
+                        <div class="summary-label">今月の利益</div>
                         <div class="summary-value" id="totalProfit">¥0</div>
                     </div>
                     <div class="summary-card profit">
@@ -546,20 +723,20 @@
                     </div>
                     
                     <div class="calendar-grid" id="calendarGrid"></div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px;">
-                    <div style="background: #c6f6d5; padding: 16px; border-radius: 10px; text-align: center;">
-                        <div style="font-size: 12px; color: #22543d; font-weight: 600;">プラス日数</div>
-                        <div id="calendarPositive" style="font-size: 18px; font-weight: 700; color: #06A77D;"></div>
-                    </div>
-                    <div style="background: #fed7d7; padding: 16px; border-radius: 10px; text-align: center;">
-                        <div style="font-size: 12px; color: #742a2a; font-weight: 600;">マイナス日数</div>
-                        <div id="calendarNegative" style="font-size: 18px; font-weight: 700; color: #FF6B35;"></div>
-                    </div>
-                    <div style="background: #edf2f7; padding: 16px; border-radius: 10px; text-align: center;">
-                        <div style="font-size: 12px; color: #4a5568; font-weight: 600;">ニュートラル</div>
-                        <div id="calendarNeutral" style="font-size: 18px; font-weight: 700; color: #718096;"></div>
+                    
+                    <div class="calendar-stats">
+                        <div class="calendar-stat" style="background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);">
+                            <div class="calendar-stat-label" style="color: #22543d;">プラス日数</div>
+                            <div class="calendar-stat-value" id="calendarPositive" style="color: #06A77D;"></div>
+                        </div>
+                        <div class="calendar-stat" style="background: linear-gradient(135deg, #fed7d7 0%, #fc8787 100%);">
+                            <div class="calendar-stat-label" style="color: #742a2a;">マイナス日数</div>
+                            <div class="calendar-stat-value" id="calendarNegative" style="color: #FF6B35;"></div>
+                        </div>
+                        <div class="calendar-stat" style="background: #f0f4f8;">
+                            <div class="calendar-stat-label" style="color: #4a5568;">ニュートラル</div>
+                            <div class="calendar-stat-value" id="calendarNeutral" style="color: #718096;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -691,15 +868,15 @@
                     <p>バックアップと復元</p>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div class="data-grid">
                     <div class="form-section">
-                        <div class="form-title">エクスポート</div>
+                        <div class="form-title">📥 エクスポート</div>
                         <p style="color: #718096; font-size: 13px; margin-bottom: 16px;">データをダウンロード</p>
                         <button class="btn-primary" onclick="exportData()">JSONをダウンロード</button>
                     </div>
                     
                     <div class="form-section">
-                        <div class="form-title">インポート</div>
+                        <div class="form-title">📤 インポート</div>
                         <div class="form-group">
                             <label class="form-label">JSONを貼り付け</label>
                             <textarea id="importText" class="form-control" style="min-height: 100px; font-family: monospace; font-size: 12px;"></textarea>
@@ -814,20 +991,34 @@
             return { revenue: totalRevenue, expense: totalExpense };
         }
         
+        function getMonthlyTotals() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            
+            let totalRevenue = 0;
+            let totalExpense = 0;
+            
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            
+            for (let day = 1; day <= lastDay; day++) {
+                const date = new Date(year, month, day);
+                const details = getDayDetails(date);
+                totalRevenue += details.revenue;
+                totalExpense += details.expense;
+            }
+            
+            return { revenue: totalRevenue, expense: totalExpense };
+        }
+        
         function updateDisplay() {
-            const today = formatDate(new Date());
-            const history = Storage.getDailyHistory();
-            const record = history[today] || { revenue: 0, expense: 0 };
-            const recurring = getRecurringForDate(new Date());
+            const totals = getMonthlyTotals();
+            const profit = totals.revenue - totals.expense;
             
-            const totalRevenue = record.revenue + recurring.revenue;
-            const totalExpense = record.expense + recurring.expense;
-            const profit = totalRevenue - totalExpense;
-            
-            document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
-            document.getElementById('totalExpense').textContent = formatCurrency(totalExpense);
+            document.getElementById('totalRevenue').textContent = formatCurrency(totals.revenue);
+            document.getElementById('totalExpense').textContent = formatCurrency(totals.expense);
             document.getElementById('totalProfit').textContent = formatCurrency(profit);
-            document.getElementById('profitRate').textContent = totalRevenue > 0 ? Math.round((profit / totalRevenue) * 100) + '%' : '0%';
+            document.getElementById('profitRate').textContent = totals.revenue > 0 ? Math.round((profit / totals.revenue) * 100) + '%' : '0%';
         }
         
         function updateCalendar() {
@@ -854,7 +1045,6 @@
                 
                 const isOtherMonth = date.getMonth() !== month;
                 const balance = getDayBalance(date);
-                const details = getDayDetails(date);
                 let statusClass = 'neutral';
                 
                 if (!isOtherMonth) {
@@ -869,15 +1059,9 @@
                     }
                 }
                 
-                let breakdown = '';
-                if (details.revenue > 0 || details.expense > 0) {
-                    breakdown = `<div class="calendar-day-breakdown">${details.revenue > 0 ? '+' + Math.floor(details.revenue/10000) + '万' : ''}${details.expense > 0 ? '-' + Math.floor(details.expense/10000) + '万' : ''}</div>`;
-                }
-                
                 html += `
                     <div class="calendar-day ${statusClass} ${isOtherMonth ? 'other-month' : ''}">
                         <div class="calendar-day-date">${date.getDate()}</div>
-                        ${breakdown}
                         <div class="calendar-day-amount">${balance > 0 ? '+' : ''}${formatCurrency(balance)}</div>
                     </div>
                 `;
