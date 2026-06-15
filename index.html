@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>セブンポケット・ダッシュボード</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/recharts@2.8.0/dist/Recharts.js"></script>
     <style>
         * {
             margin: 0;
@@ -15,430 +12,650 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: #f8f9fc;
+            color: #1a202c;
+            line-height: 1.6;
         }
         
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #5B50C1 0%, #4A4199 100%);
+            color: white;
+            padding: 24px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 24px rgba(91, 80, 193, 0.15);
+        }
+        
+        .sidebar-brand {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 32px;
+            letter-spacing: -0.5px;
+        }
+        
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            border: 2px solid transparent;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
         }
         
         .header {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
         }
         
         .header h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #5B50C1 0%, #06A77D 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .header p {
-            color: #666;
+            color: #718096;
             font-size: 14px;
         }
         
-        .summary-grid {
+        /* Summary Cards */
+        .summary-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            margin-bottom: 24px;
+            margin-bottom: 40px;
         }
         
         .summary-card {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .summary-card h3 {
-            color: #666;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-        
-        .summary-card .value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .summary-card.revenue .value {
-            color: #10b981;
-        }
-        
-        .summary-card.expense .value {
-            color: #ef4444;
-        }
-        
-        .summary-card.profit .value {
-            color: #667eea;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-            background: white;
-            padding: 8px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            overflow-x: auto;
-        }
-        
-        .tab {
-            padding: 10px 16px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 8px;
-            white-space: nowrap;
-            transition: all 0.2s;
-            color: #666;
-        }
-        
-        .tab.active {
-            background: #667eea;
-            color: white;
-        }
-        
-        .tab:hover {
-            background: #f0f0f0;
-        }
-        
-        .tab.active:hover {
-            background: #667eea;
-        }
-        
-        .content-area {
-            background: white;
-            border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
         }
         
-        .form-group {
-            margin-bottom: 20px;
+        .summary-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+            border-color: #cbd5e0;
         }
         
-        .form-group label {
-            display: block;
-            color: #333;
-            font-size: 14px;
-            margin-bottom: 8px;
+        .summary-label {
+            font-size: 12px;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            margin-bottom: 8px;
         }
         
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
+        .summary-value {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 8px;
         }
         
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
+        .summary-card.revenue .summary-value {
+            color: #06A77D;
+        }
+        
+        .summary-card.expense .summary-value {
+            color: #FF6B35;
+        }
+        
+        .summary-card.profit .summary-value {
+            color: #5B50C1;
+        }
+        
+        .summary-sub {
+            font-size: 12px;
+            color: #a0aec0;
+        }
+        
+        /* Form Section */
+        .form-section {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 40px;
+        }
+        
+        .form-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #1a202c;
         }
         
         .form-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: 1fr 200px;
             gap: 16px;
-        }
-        
-        .button {
-            padding: 10px 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        
-        .button:hover {
-            background: #764ba2;
-        }
-        
-        .button.secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-        
-        .button.secondary:hover {
-            background: #e0e0e0;
-        }
-        
-        .button.danger {
-            background: #ef4444;
-        }
-        
-        .button.danger:hover {
-            background: #dc2626;
-        }
-        
-        .service-card {
-            background: #f9fafb;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            border-left: 4px solid #667eea;
-        }
-        
-        .service-card h3 {
-            color: #333;
-            font-size: 16px;
-            margin-bottom: 12px;
-        }
-        
-        .service-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        
-        .stat {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .stat-label {
-            color: #666;
-            font-size: 12px;
-            margin-bottom: 4px;
-        }
-        
-        .stat-value {
-            color: #333;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        
-        .table {
-            width: 100%;
-            border-collapse: collapse;
             margin-bottom: 24px;
         }
         
-        .table thead {
-            background: #f9fafb;
-        }
-        
-        .table th,
-        .table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 14px;
-        }
-        
-        .table th {
-            color: #666;
-            font-weight: 600;
-        }
-        
-        .table tbody tr:hover {
-            background: #f9fafb;
-        }
-        
-        .item-list {
+        .form-group {
             display: flex;
             flex-direction: column;
-            gap: 12px;
         }
         
-        .item-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: #f9fafb;
-            padding: 12px;
-            border-radius: 8px;
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
         
-        .item-row input,
-        .item-row select {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+        .form-control {
+            padding: 12px 14px;
+            border: 1px solid #cbd5e0;
+            border-radius: 10px;
             font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #5B50C1;
+            box-shadow: 0 0 0 3px rgba(91, 80, 193, 0.1);
+        }
+        
+        /* Expense Items */
+        .expense-items {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .expense-items-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .expense-item {
+            display: grid;
+            grid-template-columns: 1fr 150px 40px;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+        
+        .expense-item:last-child {
+            margin-bottom: 0;
         }
         
         .delete-btn {
-            padding: 6px 12px;
-            background: #ef4444;
-            color: white;
+            padding: 8px 12px;
+            background: #fed7d7;
+            color: #c53030;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
         
         .delete-btn:hover {
-            background: #dc2626;
+            background: #fc8787;
+            color: white;
+        }
+        
+        .add-expense-btn {
+            padding: 10px 14px;
+            background: #edf2f7;
+            color: #5B50C1;
+            border: 1px dashed #cbd5e0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        
+        .add-expense-btn:hover {
+            background: #e2e8f0;
+            border-color: #5B50C1;
+        }
+        
+        /* Submit Button */
+        .submit-section {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn-primary {
+            flex: 1;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #5B50C1 0%, #4A4199 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(91, 80, 193, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(91, 80, 193, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        /* Services Grid */
+        .services-section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #1a202c;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        
+        .service-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #5B50C1;
+            transition: all 0.3s ease;
+        }
+        
+        .service-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+            border-left-color: #06A77D;
+        }
+        
+        .service-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 12px;
+        }
+        
+        .service-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        
+        .service-stat-label {
+            color: #718096;
+            font-weight: 500;
+        }
+        
+        .service-stat-value {
+            font-weight: 700;
+            color: #1a202c;
         }
         
         .progress-bar {
             width: 100%;
-            height: 8px;
-            background: #e5e7eb;
-            border-radius: 4px;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
             overflow: hidden;
-            margin-top: 8px;
+            margin-top: 12px;
         }
         
         .progress-fill {
             height: 100%;
-            background: #667eea;
+            background: linear-gradient(90deg, #5B50C1 0%, #06A77D 100%);
             transition: width 0.3s ease;
         }
         
-        .progress-fill.complete {
-            background: #10b981;
-        }
-        
+        /* Alert */
         .alert {
             padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 14px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: none;
         }
         
         .alert.success {
-            background: #d1fae5;
-            color: #065f46;
-            border-left: 4px solid #10b981;
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
         }
         
         .alert.error {
-            background: #fee2e2;
-            color: #7f1d1d;
-            border-left: 4px solid #ef4444;
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8787;
         }
         
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
+        .alert.show {
+            display: block;
         }
         
-        .data-actions {
-            background: #f9fafb;
-            padding: 16px;
-            border-radius: 12px;
-            margin-top: 24px;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
+        /* Hidden Content */
+        .content {
+            display: none;
         }
         
-        .data-actions button {
-            font-size: 13px;
-            padding: 8px 16px;
+        .content.active {
+            display: block;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .summary-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
         
         @media (max-width: 768px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
+            .sidebar {
+                width: 240px;
+                padding: 16px;
+            }
+            
+            .main-content {
+                margin-left: 240px;
+                padding: 20px;
             }
             
             .header h1 {
+                font-size: 24px;
+            }
+            
+            .summary-section {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .summary-card {
+                padding: 16px;
+            }
+            
+            .summary-value {
                 font-size: 20px;
             }
             
-            .summary-grid {
+            .form-row {
                 grid-template-columns: 1fr;
             }
             
-            .tabs {
-                flex-wrap: wrap;
+            .form-section {
+                padding: 20px;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .sidebar {
+                position: fixed;
+                left: -240px;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.open {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .summary-section {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-brand">💰 Seven Pockets</div>
+            <div class="sidebar-nav">
+                <div class="nav-item active" onclick="switchPage('dashboard')">📊 ダッシュボード</div>
+                <div class="nav-item" onclick="switchPage('targets')">🎯 目標値設定</div>
+                <div class="nav-item" onclick="switchPage('analysis')">📈 分析</div>
+                <div class="nav-item" onclick="switchPage('data')">💾 データ管理</div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div id="message" class="alert"></div>
+            
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="content active">
+                <div class="header">
+                    <h1>セブンポケット</h1>
+                    <p>7つの収益源を一元管理</p>
+                </div>
+                
+                <!-- Summary -->
+                <div class="summary-section">
+                    <div class="summary-card revenue">
+                        <div class="summary-label">本日の売上</div>
+                        <div class="summary-value" id="totalRevenue">¥0</div>
+                        <div class="summary-sub">全事業合計</div>
+                    </div>
+                    <div class="summary-card expense">
+                        <div class="summary-label">本日の支出</div>
+                        <div class="summary-value" id="totalExpense">¥0</div>
+                        <div class="summary-sub">全カテゴリ合計</div>
+                    </div>
+                    <div class="summary-card profit">
+                        <div class="summary-label">本日の利益</div>
+                        <div class="summary-value" id="totalProfit">¥0</div>
+                        <div class="summary-sub">売上 - 支出</div>
+                    </div>
+                    <div class="summary-card profit">
+                        <div class="summary-label">利益率</div>
+                        <div class="summary-value" id="profitRate">0%</div>
+                        <div class="summary-sub">利益 / 売上</div>
+                    </div>
+                </div>
+                
+                <!-- Input Form -->
+                <div class="form-section">
+                    <div class="form-title">本日の記録</div>
+                    
+                    <form onsubmit="handleSubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">売上（サービス）</label>
+                                <select id="serviceSelect" class="form-control">
+                                    <option value="1">愛しとーと</option>
+                                    <option value="2">児童手当</option>
+                                    <option value="3">GFEF貸付収益</option>
+                                    <option value="4">GFEF投資収益</option>
+                                    <option value="5">GFEFサブスク</option>
+                                    <option value="6">WAVE ORACLE</option>
+                                    <option value="7">ギャンブル投資</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">売上金額</label>
+                                <input type="number" id="revenueAmount" class="form-control" placeholder="0" step="1000">
+                            </div>
+                        </div>
+                        
+                        <!-- Expense Items -->
+                        <div class="expense-items">
+                            <div class="expense-items-title">支出（複数追加可能）</div>
+                            <div id="expenseList"></div>
+                            <button type="button" class="add-expense-btn" onclick="addExpenseItem()">+ もう1件追加</button>
+                        </div>
+                        
+                        <div class="submit-section">
+                            <button type="submit" class="btn-primary">本日を記録する</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Services Overview -->
+                <div class="services-section">
+                    <div class="section-title">各事業の進捗</div>
+                    <div class="services-grid" id="servicesGrid"></div>
+                </div>
+            </div>
+            
+            <!-- Targets Page -->
+            <div id="targets" class="content">
+                <div class="header">
+                    <h1>目標値設定</h1>
+                    <p>月間目標とKPIを管理</p>
+                </div>
+                
+                <div class="form-section">
+                    <form onsubmit="handleTargetSubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">サービス</label>
+                                <select id="targetService" class="form-control">
+                                    <option value="1">愛しとーと</option>
+                                    <option value="2">児童手当</option>
+                                    <option value="3">GFEF貸付収益</option>
+                                    <option value="4">GFEF投資収益</option>
+                                    <option value="5">GFEFサブスク</option>
+                                    <option value="6">WAVE ORACLE</option>
+                                    <option value="7">ギャンブル投資</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">月間売上目標</label>
+                                <input type="number" id="targetRevenue" class="form-control" placeholder="0" step="10000">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">KPI名</label>
+                                <input type="text" id="targetKpiName" class="form-control" placeholder="例：ユーザー数">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">KPI値</label>
+                                <input type="number" id="targetKpiValue" class="form-control" placeholder="0">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">保存</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Analysis Page -->
+            <div id="analysis" class="content">
+                <div class="header">
+                    <h1>サービス別分析</h1>
+                    <p>各事業の詳細を確認</p>
+                </div>
+                
+                <div id="analysisContent"></div>
+            </div>
+            
+            <!-- Data Management Page -->
+            <div id="data" class="content">
+                <div class="header">
+                    <h1>データ管理</h1>
+                    <p>バックアップと復元</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="form-section">
+                        <div class="form-title">バックアップ</div>
+                        <p style="color: #718096; font-size: 13px; margin-bottom: 16px;">すべてのデータをダウンロードします</p>
+                        <button class="btn-primary" onclick="exportData()">データをエクスポート</button>
+                    </div>
+                    
+                    <div class="form-section">
+                        <div class="form-title">復元</div>
+                        <div class="form-group">
+                            <label class="form-label">JSONを貼り付け</label>
+                            <textarea id="importText" class="form-control" style="min-height: 120px; font-family: monospace; font-size: 12px;"></textarea>
+                        </div>
+                        <button class="btn-primary" onclick="importData()">データをインポート</button>
+                    </div>
+                </div>
+                
+                <div class="form-section" style="background: #fed7d7; border-color: #fc8787; margin-top: 24px;">
+                    <div class="form-title" style="color: #742a2a;">危険ゾーン</div>
+                    <button class="btn-primary" style="background: #fc8787; box-shadow: 0 4px 12px rgba(252, 135, 135, 0.3);" onclick="clearAllData()">すべてのデータを削除</button>
+                    <p style="color: #742a2a; font-size: 12px; margin-top: 12px;">この操作は取り消せません</p>
+                </div>
+            </div>
+        </div>
+    </div>
     
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
-        
-        // ローカルストレージ管理
-        const Storage = {
-            getRevenueToday: () => JSON.parse(localStorage.getItem('revenue_today') || '{}'),
-            setRevenueToday: (data) => localStorage.setItem('revenue_today', JSON.stringify(data)),
-            
-            getExpensesToday: () => JSON.parse(localStorage.getItem('expenses_today') || '{}'),
-            setExpensesToday: (data) => localStorage.setItem('expenses_today', JSON.stringify(data)),
-            
-            getExpenseCategories: () => JSON.parse(localStorage.getItem('expense_categories') || '[]'),
-            setExpenseCategories: (data) => localStorage.setItem('expense_categories', JSON.stringify(data)),
-            
-            getTargets: () => JSON.parse(localStorage.getItem('targets') || '{}'),
-            setTargets: (data) => localStorage.setItem('targets', JSON.stringify(data)),
-            
-            getHistory: () => JSON.parse(localStorage.getItem('revenue_history') || '[]'),
-            addHistory: (date, serviceId, amount) => {
-                const history = Storage.getHistory();
-                history.push({ date, serviceId, amount, timestamp: new Date().getTime() });
-                localStorage.setItem('revenue_history', JSON.stringify(history));
-            },
-            
-            clearAll: () => {
-                if (confirm('すべてのデータを削除してもよろしいですか？')) {
-                    localStorage.clear();
-                    window.location.reload();
-                }
-            },
-            
-            exportData: () => {
-                const data = {
-                    revenue_today: Storage.getRevenueToday(),
-                    expenses_today: Storage.getExpensesToday(),
-                    expense_categories: Storage.getExpenseCategories(),
-                    targets: Storage.getTargets(),
-                    revenue_history: Storage.getHistory(),
-                    exported_at: new Date().toISOString()
-                };
-                return JSON.stringify(data, null, 2);
-            },
-            
-            importData: (jsonStr) => {
-                try {
-                    const data = JSON.parse(jsonStr);
-                    localStorage.setItem('revenue_today', JSON.stringify(data.revenue_today || {}));
-                    localStorage.setItem('expenses_today', JSON.stringify(data.expenses_today || {}));
-                    localStorage.setItem('expense_categories', JSON.stringify(data.expense_categories || []));
-                    localStorage.setItem('targets', JSON.stringify(data.targets || {}));
-                    localStorage.setItem('revenue_history', JSON.stringify(data.revenue_history || []));
-                    return true;
-                } catch (e) {
-                    return false;
-                }
-            }
-        };
-        
+    <script>
         const SERVICES = [
             { id: '1', name: '愛しとーと', defaultTarget: 530000 },
             { id: '2', name: '児童手当', defaultTarget: 80000 },
@@ -449,688 +666,239 @@
             { id: '7', name: 'ギャンブル投資', defaultTarget: 0 }
         ];
         
-        function App() {
-            const [activeTab, setActiveTab] = useState('dashboard');
-            const [revenueToday, setRevenueToday] = useState(Storage.getRevenueToday());
-            const [expensesToday, setExpensesToday] = useState(Storage.getExpensesToday());
-            const [categories, setCategories] = useState(Storage.getExpenseCategories());
-            const [targets, setTargets] = useState(Storage.getTargets());
-            const [message, setMessage] = useState('');
-            
-            const saveRevenue = (data) => {
-                Storage.setRevenueToday(data);
-                setRevenueToday(data);
-            };
-            
-            const saveExpenses = (data) => {
-                Storage.setExpensesToday(data);
-                setExpensesToday(data);
-            };
-            
-            const saveCategories = (data) => {
-                Storage.setExpenseCategories(data);
-                setCategories(data);
-            };
-            
-            const saveTargets = (data) => {
-                Storage.setTargets(data);
-                setTargets(data);
-            };
-            
-            const formatCurrency = (value) => {
-                return `¥${Math.floor(value).toLocaleString('ja-JP')}`;
-            };
+        const Storage = {
+            getRevenueToday: () => JSON.parse(localStorage.getItem('revenue_today') || '{}'),
+            setRevenueToday: (data) => localStorage.setItem('revenue_today', JSON.stringify(data)),
+            getExpensesToday: () => JSON.parse(localStorage.getItem('expenses_today') || '{}'),
+            setExpensesToday: (data) => localStorage.setItem('expenses_today', JSON.stringify(data)),
+            getCategories: () => JSON.parse(localStorage.getItem('expense_categories') || '[]'),
+            setCategories: (data) => localStorage.setItem('expense_categories', JSON.stringify(data)),
+            getTargets: () => JSON.parse(localStorage.getItem('targets') || '{}'),
+            setTargets: (data) => localStorage.setItem('targets', JSON.stringify(data)),
+        };
+        
+        function formatCurrency(value) {
+            return '¥' + Math.floor(value).toLocaleString('ja-JP');
+        }
+        
+        function showMessage(msg, type = 'success') {
+            const alert = document.getElementById('message');
+            alert.textContent = msg;
+            alert.className = 'alert show ' + type;
+            setTimeout(() => alert.classList.remove('show'), 3000);
+        }
+        
+        function updateDisplay() {
+            const revenueToday = Storage.getRevenueToday();
+            const expensesToday = Storage.getExpensesToday();
+            const categories = Storage.getCategories();
+            const targets = Storage.getTargets();
             
             const totalRevenue = Object.values(revenueToday).reduce((a, b) => a + (Number(b) || 0), 0);
             const totalExpense = Object.values(expensesToday).reduce((a, b) => a + (Number(b) || 0), 0);
             const profit = totalRevenue - totalExpense;
             
-            const showMessage = (msg, type = 'success') => {
-                setMessage({ text: msg, type });
-                setTimeout(() => setMessage(''), 3000);
-            };
+            document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('totalExpense').textContent = formatCurrency(totalExpense);
+            document.getElementById('totalProfit').textContent = formatCurrency(profit);
+            document.getElementById('profitRate').textContent = totalRevenue > 0 ? Math.round((profit / totalRevenue) * 100) + '%' : '0%';
             
-            return (
-                <div className="container">
-                    <div className="header">
-                        <h1>セブンポケット・ダッシュボード</h1>
-                        <p>7つの収益源を一元管理</p>
+            // Services Grid
+            let servicesHtml = '';
+            SERVICES.forEach(service => {
+                const revenue = Number(revenueToday[service.id]) || 0;
+                const target = targets[service.id]?.revenue || service.defaultTarget;
+                const progress = target > 0 ? Math.min((revenue / target) * 100, 100) : 0;
+                
+                servicesHtml += `
+                    <div class="service-card">
+                        <div class="service-name">${service.name}</div>
+                        <div class="service-stat">
+                            <span class="service-stat-label">本日</span>
+                            <span class="service-stat-value">${formatCurrency(revenue)}</span>
+                        </div>
+                        <div class="service-stat">
+                            <span class="service-stat-label">目標</span>
+                            <span class="service-stat-value">${formatCurrency(target)}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%;"></div>
+                        </div>
+                        <div style="font-size: 11px; color: #718096; margin-top: 8px; text-align: right;">${Math.round(progress)}%</div>
                     </div>
-                    
-                    {message && (
-                        <div className={`alert ${message.type}`}>
-                            {message.text}
+                `;
+            });
+            document.getElementById('servicesGrid').innerHTML = servicesHtml;
+            
+            // Analysis
+            let analysisHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;">';
+            SERVICES.forEach(service => {
+                const revenue = Number(revenueToday[service.id]) || 0;
+                const target = targets[service.id]?.revenue || service.defaultTarget;
+                const kpiName = targets[service.id]?.kpiName;
+                const kpiValue = targets[service.id]?.kpiValue;
+                
+                analysisHtml += `
+                    <div class="service-card">
+                        <div class="service-name">${service.name}</div>
+                        <div class="service-stat">
+                            <span class="service-stat-label">売上</span>
+                            <span class="service-stat-value" style="color: #06A77D;">${formatCurrency(revenue)}</span>
                         </div>
-                    )}
-                    
-                    <div className="summary-grid">
-                        <div className="summary-card revenue">
-                            <h3>本日の売上</h3>
-                            <div className="value">{formatCurrency(totalRevenue)}</div>
+                        <div class="service-stat">
+                            <span class="service-stat-label">目標</span>
+                            <span class="service-stat-value">${formatCurrency(target)}</span>
                         </div>
-                        <div className="summary-card expense">
-                            <h3>本日の支出</h3>
-                            <div className="value">{formatCurrency(totalExpense)}</div>
+                        <div class="service-stat">
+                            <span class="service-stat-label">進捗</span>
+                            <span class="service-stat-value">${target > 0 ? Math.round((revenue / target) * 100) : 0}%</span>
                         </div>
-                        <div className="summary-card profit">
-                            <h3>本日の利益</h3>
-                            <div className="value">{formatCurrency(profit)}</div>
-                        </div>
-                        <div className="summary-card">
-                            <h3>利益率</h3>
-                            <div className="value">
-                                {totalRevenue > 0 ? Math.round((profit / totalRevenue) * 100) : 0}%
+                        ${kpiName ? `
+                            <div class="service-stat">
+                                <span class="service-stat-label">${kpiName}</span>
+                                <span class="service-stat-value">${kpiValue}</span>
                             </div>
-                        </div>
+                        ` : ''}
                     </div>
-                    
-                    <div className="tabs">
-                        {[
-                            { id: 'dashboard', label: 'ダッシュボード' },
-                            { id: 'revenue', label: '売上入力' },
-                            { id: 'expense', label: '支出管理' },
-                            { id: 'targets', label: '目標値設定' },
-                            { id: 'services', label: 'サービス別分析' },
-                            { id: 'data', label: 'データ管理' }
-                        ].map(t => (
-                            <button
-                                key={t.id}
-                                className={`tab ${activeTab === t.id ? 'active' : ''}`}
-                                onClick={() => setActiveTab(t.id)}
-                            >
-                                {t.label}
-                            </button>
-                        ))}
-                    </div>
-                    
-                    <div className="content-area">
-                        {activeTab === 'dashboard' && (
-                            <DashboardTab
-                                revenueToday={revenueToday}
-                                targets={targets}
-                                formatCurrency={formatCurrency}
-                            />
-                        )}
-                        {activeTab === 'revenue' && (
-                            <RevenueTab
-                                revenueToday={revenueToday}
-                                onSave={saveRevenue}
-                                formatCurrency={formatCurrency}
-                                showMessage={showMessage}
-                            />
-                        )}
-                        {activeTab === 'expense' && (
-                            <ExpenseTab
-                                categories={categories}
-                                expensesToday={expensesToday}
-                                onSaveCategories={saveCategories}
-                                onSaveExpenses={saveExpenses}
-                                formatCurrency={formatCurrency}
-                                showMessage={showMessage}
-                            />
-                        )}
-                        {activeTab === 'targets' && (
-                            <TargetsTab
-                                targets={targets}
-                                onSave={saveTargets}
-                                formatCurrency={formatCurrency}
-                                showMessage={showMessage}
-                            />
-                        )}
-                        {activeTab === 'services' && (
-                            <ServicesTab
-                                revenueToday={revenueToday}
-                                expensesToday={expensesToday}
-                                categories={categories}
-                                targets={targets}
-                                formatCurrency={formatCurrency}
-                            />
-                        )}
-                        {activeTab === 'data' && (
-                            <DataTab
-                                showMessage={showMessage}
-                            />
-                        )}
-                    </div>
-                </div>
-            );
+                `;
+            });
+            analysisHtml += '</div>';
+            document.getElementById('analysisContent').innerHTML = analysisHtml;
         }
         
-        function DashboardTab({ revenueToday, targets, formatCurrency }) {
-            return (
-                <div>
-                    <h2 style={{ marginBottom: '24px', color: '#333' }}>今月の概要</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                        {SERVICES.map(service => {
-                            const revenue = Number(revenueToday[service.id]) || 0;
-                            const target = targets[service.id]?.revenue || service.defaultTarget;
-                            const progress = target > 0 ? Math.min((revenue / target) * 100, 100) : 0;
-                            
-                            return (
-                                <div key={service.id} className="service-card">
-                                    <h3>{service.name}</h3>
-                                    <div className="service-stats">
-                                        <div className="stat">
-                                            <div className="stat-label">本日売上</div>
-                                            <div className="stat-value">{formatCurrency(revenue)}</div>
-                                        </div>
-                                        <div className="stat">
-                                            <div className="stat-label">目標値</div>
-                                            <div className="stat-value">{formatCurrency(target)}</div>
-                                        </div>
-                                    </div>
-                                    <div className="progress-bar">
-                                        <div
-                                            className={`progress-fill ${progress >= 100 ? 'complete' : ''}`}
-                                            style={{ width: `${progress}%` }}
-                                        ></div>
-                                    </div>
-                                    <div style={{ marginTop: '8px', textAlign: 'right', fontSize: '12px', color: '#666' }}>
-                                        {Math.round(progress)}%
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+        function addExpenseItem() {
+            const categories = Storage.getCategories();
+            const list = document.getElementById('expenseList');
+            
+            const itemHtml = `
+                <div class="expense-item">
+                    <select class="form-control expense-category">
+                        <option value="">カテゴリ選択</option>
+                        ${categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                    </select>
+                    <input type="number" class="form-control expense-amount" placeholder="金額" step="100">
+                    <button type="button" class="delete-btn" onclick="this.parentElement.remove()">削除</button>
                 </div>
-            );
+            `;
+            
+            const div = document.createElement('div');
+            div.innerHTML = itemHtml;
+            list.insertBefore(div.firstElementChild, list.lastElementChild);
         }
         
-        function RevenueTab({ revenueToday, onSave, formatCurrency, showMessage }) {
-            const [selectedService, setSelectedService] = useState('1');
-            const [amount, setAmount] = useState('');
-            const [notes, setNotes] = useState('');
+        function handleSubmit(e) {
+            e.preventDefault();
             
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                if (!amount) {
-                    showMessage('金額を入力してください', 'error');
-                    return;
+            const serviceId = document.getElementById('serviceSelect').value;
+            const amount = document.getElementById('revenueAmount').value;
+            
+            if (!amount) {
+                showMessage('売上金額を入力してください', 'error');
+                return;
+            }
+            
+            const revenue = Storage.getRevenueToday();
+            revenue[serviceId] = Number(amount);
+            Storage.setRevenueToday(revenue);
+            
+            const expenses = Storage.getExpensesToday();
+            document.querySelectorAll('.expense-item').forEach(item => {
+                const catId = item.querySelector('.expense-category').value;
+                const amt = item.querySelector('.expense-amount').value;
+                if (catId && amt) {
+                    expenses[catId] = Number(amt);
                 }
-                
-                const newData = { ...revenueToday };
-                newData[selectedService] = Number(amount);
-                onSave(newData);
-                
-                Storage.addHistory(new Date().toISOString().split('T')[0], selectedService, Number(amount));
-                
-                setAmount('');
-                setNotes('');
-                showMessage(`${SERVICES.find(s => s.id === selectedService).name}の売上を記録しました`);
-            };
+            });
+            Storage.setExpensesToday(expenses);
             
-            return (
-                <div>
-                    <h2 style={{ marginBottom: '24px', color: '#333' }}>売上を記録</h2>
-                    
-                    <div className="grid-2">
-                        <div>
-                            <form onSubmit={handleSubmit}>
-                                <div className="form-group">
-                                    <label>サービス選択</label>
-                                    <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)}>
-                                        {SERVICES.map(s => (
-                                            <option key={s.id} value={s.id}>{s.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                
-                                <div className="form-group">
-                                    <label>金額（円）</label>
-                                    <input
-                                        type="number"
-                                        value={amount}
-                                        onChange={(e) => setAmount(e.target.value)}
-                                        placeholder="0"
-                                        step="1000"
-                                    />
-                                </div>
-                                
-                                <div className="form-group">
-                                    <label>備考（任意）</label>
-                                    <textarea
-                                        value={notes}
-                                        onChange={(e) => setNotes(e.target.value)}
-                                        placeholder="メモ"
-                                    ></textarea>
-                                </div>
-                                
-                                <button type="submit" className="button">記録する</button>
-                            </form>
-                        </div>
-                        
-                        <div>
-                            <h3 style={{ marginBottom: '16px', color: '#333' }}>本日の売上</h3>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>サービス</th>
-                                        <th style={{ textAlign: 'right' }}>金額</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {SERVICES.map(s => (
-                                        <tr key={s.id}>
-                                            <td>{s.name}</td>
-                                            <td style={{ textAlign: 'right' }}>{formatCurrency(Number(revenueToday[s.id]) || 0)}</td>
-                                        </tr>
-                                    ))}
-                                    <tr style={{ fontWeight: 'bold', background: '#f9fafb' }}>
-                                        <td>合計</td>
-                                        <td style={{ textAlign: 'right' }}>
-                                            {formatCurrency(Object.values(revenueToday).reduce((a, b) => a + (Number(b) || 0), 0))}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            );
+            document.getElementById('revenueAmount').value = '';
+            document.getElementById('expenseList').innerHTML = '';
+            addExpenseItem();
+            
+            updateDisplay();
+            showMessage('本日の記録を保存しました');
         }
         
-        function ExpenseTab({ categories, expensesToday, onSaveCategories, onSaveExpenses, formatCurrency, showMessage }) {
-            const [categoryName, setCategoryName] = useState('');
-            const [selectedService, setSelectedService] = useState('');
-            const [amount, setAmount] = useState('');
-            const [selectedCategory, setSelectedCategory] = useState('');
-            const [notes, setNotes] = useState('');
+        function handleTargetSubmit(e) {
+            e.preventDefault();
             
-            const handleAddCategory = (e) => {
-                e.preventDefault();
-                if (!categoryName) {
-                    showMessage('カテゴリ名を入力してください', 'error');
-                    return;
-                }
-                
-                const newCategory = {
-                    id: Date.now().toString(),
-                    name: categoryName,
-                    service: selectedService || 'all'
-                };
-                
-                onSaveCategories([...categories, newCategory]);
-                setCategoryName('');
-                setSelectedService('');
-                showMessage('カテゴリを追加しました');
+            const serviceId = document.getElementById('targetService').value;
+            const revenue = document.getElementById('targetRevenue').value;
+            const kpiName = document.getElementById('targetKpiName').value;
+            const kpiValue = document.getElementById('targetKpiValue').value;
+            
+            const targets = Storage.getTargets();
+            targets[serviceId] = {
+                revenue: revenue ? Number(revenue) : null,
+                kpiName: kpiName,
+                kpiValue: kpiValue ? Number(kpiValue) : null
             };
+            Storage.setTargets(targets);
             
-            const handleDeleteCategory = (categoryId) => {
-                if (confirm('削除してもよろしいですか？')) {
-                    onSaveCategories(categories.filter(c => c.id !== categoryId));
-                    showMessage('カテゴリを削除しました');
-                }
-            };
-            
-            const handleAddExpense = (e) => {
-                e.preventDefault();
-                if (!selectedCategory || !amount) {
-                    showMessage('カテゴリと金額を入力してください', 'error');
-                    return;
-                }
-                
-                const newData = { ...expensesToday };
-                newData[selectedCategory] = Number(amount);
-                onSaveExpenses(newData);
-                
-                setAmount('');
-                setNotes('');
-                setSelectedCategory('');
-                showMessage('支出を記録しました');
-            };
-            
-            return (
-                <div className="grid-2">
-                    <div>
-                        <h3 style={{ marginBottom: '16px', color: '#333' }}>支出カテゴリを管理</h3>
-                        <form onSubmit={handleAddCategory} style={{ marginBottom: '24px' }}>
-                            <div className="form-group">
-                                <label>カテゴリ名</label>
-                                <input
-                                    type="text"
-                                    value={categoryName}
-                                    onChange={(e) => setCategoryName(e.target.value)}
-                                    placeholder="例：広告費、サーバー費用"
-                                />
-                            </div>
-                            
-                            <div className="form-group">
-                                <label>関連サービス（任意）</label>
-                                <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)}>
-                                    <option value="">全サービス共通</option>
-                                    {SERVICES.map(s => (
-                                        <option key={s.id} value={s.id}>{s.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            
-                            <button type="submit" className="button">カテゴリを追加</button>
-                        </form>
-                        
-                        <div>
-                            <h4 style={{ marginBottom: '12px', color: '#333' }}>既存カテゴリ</h4>
-                            <div className="item-list">
-                                {categories.length === 0 ? (
-                                    <p style={{ color: '#999', fontSize: '14px' }}>カテゴリはまだありません</p>
-                                ) : (
-                                    categories.map(cat => (
-                                        <div key={cat.id} className="item-row" style={{ justifyContent: 'space-between' }}>
-                                            <div>
-                                                <div style={{ fontWeight: '600', color: '#333' }}>{cat.name}</div>
-                                                {cat.service && cat.service !== 'all' && (
-                                                    <div style={{ fontSize: '12px', color: '#999' }}>
-                                                        {SERVICES.find(s => s.id === cat.service)?.name}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <button
-                                                className="delete-btn"
-                                                onClick={() => handleDeleteCategory(cat.id)}
-                                            >
-                                                削除
-                                            </button>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <h3 style={{ marginBottom: '16px', color: '#333' }}>支出を記録</h3>
-                        <form onSubmit={handleAddExpense} style={{ marginBottom: '24px' }}>
-                            <div className="form-group">
-                                <label>カテゴリ</label>
-                                <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-                                    <option value="">選択してください</option>
-                                    {categories.map(cat => (
-                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            
-                            <div className="form-group">
-                                <label>金額（円）</label>
-                                <input
-                                    type="number"
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                    placeholder="0"
-                                    step="100"
-                                />
-                            </div>
-                            
-                            <div className="form-group">
-                                <label>備考（任意）</label>
-                                <textarea
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    placeholder="メモ"
-                                ></textarea>
-                            </div>
-                            
-                            <button type="submit" className="button">記録する</button>
-                        </form>
-                        
-                        <h4 style={{ marginBottom: '12px', color: '#333' }}>本日の支出</h4>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>カテゴリ</th>
-                                    <th style={{ textAlign: 'right' }}>金額</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {categories.map(cat => (
-                                    <tr key={cat.id}>
-                                        <td>{cat.name}</td>
-                                        <td style={{ textAlign: 'right' }}>{formatCurrency(Number(expensesToday[cat.id]) || 0)}</td>
-                                    </tr>
-                                ))}
-                                <tr style={{ fontWeight: 'bold', background: '#f9fafb' }}>
-                                    <td>合計</td>
-                                    <td style={{ textAlign: 'right' }}>
-                                        {formatCurrency(Object.values(expensesToday).reduce((a, b) => a + (Number(b) || 0), 0))}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            );
+            updateDisplay();
+            showMessage('目標値を保存しました');
         }
         
-        function TargetsTab({ targets, onSave, formatCurrency, showMessage }) {
-            const [selectedService, setSelectedService] = useState('1');
-            const [revenueTarget, setRevenueTarget] = useState('');
-            const [kpiName, setKpiName] = useState('');
-            const [kpiValue, setKpiValue] = useState('');
+        function switchPage(pageId) {
+            document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
             
-            useEffect(() => {
-                if (targets[selectedService]) {
-                    setRevenueTarget(targets[selectedService].revenue || '');
-                    setKpiName(targets[selectedService].kpiName || '');
-                    setKpiValue(targets[selectedService].kpiValue || '');
-                } else {
-                    setRevenueTarget('');
-                    setKpiName('');
-                    setKpiValue('');
-                }
-            }, [selectedService, targets]);
-            
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                
-                const newTargets = { ...targets };
-                newTargets[selectedService] = {
-                    revenue: revenueTarget ? Number(revenueTarget) : null,
-                    kpiName: kpiName,
-                    kpiValue: kpiValue ? Number(kpiValue) : null
-                };
-                
-                onSave(newTargets);
-                showMessage('目標値を設定しました');
-            };
-            
-            return (
-                <div style={{ maxWidth: '500px' }}>
-                    <h2 style={{ marginBottom: '24px', color: '#333' }}>目標値を設定</h2>
-                    
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>サービス</label>
-                            <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)}>
-                                {SERVICES.map(s => (
-                                    <option key={s.id} value={s.id}>{s.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                        
-                        <div className="form-group">
-                            <label>月間売上目標（円）</label>
-                            <input
-                                type="number"
-                                value={revenueTarget}
-                                onChange={(e) => setRevenueTarget(e.target.value)}
-                                placeholder="0"
-                                step="10000"
-                            />
-                        </div>
-                        
-                        <div className="form-group">
-                            <label>KPI名</label>
-                            <input
-                                type="text"
-                                value={kpiName}
-                                onChange={(e) => setKpiName(e.target.value)}
-                                placeholder="例：ユーザー数、転換率"
-                            />
-                        </div>
-                        
-                        <div className="form-group">
-                            <label>KPI目標値</label>
-                            <input
-                                type="number"
-                                value={kpiValue}
-                                onChange={(e) => setKpiValue(e.target.value)}
-                                placeholder="0"
-                                step="1"
-                            />
-                        </div>
-                        
-                        <button type="submit" className="button">保存</button>
-                    </form>
-                </div>
-            );
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
         }
         
-        function ServicesTab({ revenueToday, expensesToday, categories, targets, formatCurrency }) {
-            return (
-                <div>
-                    <h2 style={{ marginBottom: '24px', color: '#333' }}>サービス別分析</h2>
-                    
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
-                        {SERVICES.map(service => {
-                            const revenue = Number(revenueToday[service.id]) || 0;
-                            const target = targets[service.id]?.revenue || service.defaultTarget;
-                            const kpiName = targets[service.id]?.kpiName;
-                            const kpiValue = targets[service.id]?.kpiValue;
-                            
-                            // サービスに紐付く支出を計算
-                            const serviceExpenses = categories
-                                .filter(c => !c.service || c.service === 'all' || c.service === service.id)
-                                .reduce((sum, c) => sum + (Number(expensesToday[c.id]) || 0), 0);
-                            
-                            const profit = revenue - serviceExpenses;
-                            
-                            return (
-                                <div key={service.id} className="service-card">
-                                    <h3>{service.name}</h3>
-                                    
-                                    <table className="table" style={{ fontSize: '13px' }}>
-                                        <tbody>
-                                            <tr>
-                                                <td style={{ width: '50%' }}>本日売上</td>
-                                                <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#10b981' }}>
-                                                    {formatCurrency(revenue)}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>本日支出</td>
-                                                <td style={{ textAlign: 'right', color: '#ef4444' }}>
-                                                    {formatCurrency(serviceExpenses)}
-                                                </td>
-                                            </tr>
-                                            <tr style={{ background: '#f9fafb' }}>
-                                                <td style={{ fontWeight: 'bold' }}>利益</td>
-                                                <td style={{ textAlign: 'right', fontWeight: 'bold', color: '#667eea' }}>
-                                                    {formatCurrency(profit)}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>月間目標</td>
-                                                <td style={{ textAlign: 'right' }}>{formatCurrency(target)}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>進捗率</td>
-                                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                                                    {target > 0 ? Math.round((revenue / target) * 100) : 0}%
-                                                </td>
-                                            </tr>
-                                            {kpiName && (
-                                                <tr>
-                                                    <td>{kpiName}</td>
-                                                    <td style={{ textAlign: 'right' }}>{kpiValue}</td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            );
-        }
-        
-        function DataTab({ showMessage }) {
-            const [importText, setImportText] = useState('');
-            
-            const handleExport = () => {
-                const data = Storage.exportData();
-                const blob = new Blob([data], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `seven-pockets-backup-${new Date().toISOString().slice(0, 10)}.json`;
-                a.click();
-                showMessage('データをエクスポートしました');
+        function exportData() {
+            const data = {
+                revenue_today: Storage.getRevenueToday(),
+                expenses_today: Storage.getExpensesToday(),
+                expense_categories: Storage.getCategories(),
+                targets: Storage.getTargets(),
+                exported_at: new Date().toISOString()
             };
             
-            const handleImport = () => {
-                if (!importText.trim()) {
-                    showMessage('JSONデータを貼り付けてください', 'error');
-                    return;
-                }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'seven-pockets-' + new Date().toISOString().slice(0, 10) + '.json';
+            a.click();
+            showMessage('データをエクスポートしました');
+        }
+        
+        function importData() {
+            const json = document.getElementById('importText').value;
+            if (!json.trim()) {
+                showMessage('JSONを貼り付けてください', 'error');
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(json);
+                localStorage.setItem('revenue_today', JSON.stringify(data.revenue_today || {}));
+                localStorage.setItem('expenses_today', JSON.stringify(data.expenses_today || {}));
+                localStorage.setItem('expense_categories', JSON.stringify(data.expense_categories || []));
+                localStorage.setItem('targets', JSON.stringify(data.targets || {}));
                 
-                if (Storage.importData(importText)) {
-                    showMessage('データをインポートしました');
-                    setImportText('');
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    showMessage('データのインポートに失敗しました', 'error');
-                }
-            };
-            
-            return (
-                <div>
-                    <h2 style={{ marginBottom: '24px', color: '#333' }}>データ管理</h2>
-                    
-                    <div className="grid-2">
-                        <div>
-                            <h3 style={{ marginBottom: '16px', color: '#333' }}>バックアップ</h3>
-                            <p style={{ color: '#666', marginBottom: '16px', fontSize: '14px' }}>
-                                現在のすべてのデータをJSONファイルとしてダウンロードします。
-                            </p>
-                            <button className="button" onClick={handleExport}>
-                                データをエクスポート
-                            </button>
-                        </div>
-                        
-                        <div>
-                            <h3 style={{ marginBottom: '16px', color: '#333' }}>復元</h3>
-                            <div className="form-group">
-                                <label>JSONデータを貼り付け</label>
-                                <textarea
-                                    value={importText}
-                                    onChange={(e) => setImportText(e.target.value)}
-                                    placeholder="バックアップファイルの内容を貼り付けてください"
-                                    style={{ minHeight: '150px' }}
-                                ></textarea>
-                            </div>
-                            <button className="button" onClick={handleImport}>
-                                データをインポート
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div style={{ marginTop: '32px', padding: '16px', background: '#fee2e2', borderRadius: '8px', borderLeft: '4px solid #ef4444' }}>
-                        <h3 style={{ marginBottom: '12px', color: '#7f1d1d' }}>危険ゾーン</h3>
-                        <button
-                            className="button danger"
-                            onClick={() => Storage.clearAll()}
-                        >
-                            すべてのデータを削除
-                        </button>
-                        <p style={{ color: '#7f1d1d', fontSize: '13px', marginTop: '8px' }}>
-                            この操作は取り消せません。本当に確実な場合のみをクリックしてください。
-                        </p>
-                    </div>
-                </div>
-            );
+                updateDisplay();
+                showMessage('データをインポートしました');
+                setTimeout(() => location.reload(), 1000);
+            } catch (e) {
+                showMessage('JSONが無効です', 'error');
+            }
         }
         
-        ReactDOM.render(<App />, document.getElementById('root'));
+        function clearAllData() {
+            if (confirm('本当にすべてのデータを削除しますか？')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+        
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            addExpenseItem();
+            updateDisplay();
+        });
     </script>
 </body>
 </html>
