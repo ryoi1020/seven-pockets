@@ -283,6 +283,39 @@
             }
         }
         
+        .tab-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .tab-button {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #718096;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+            margin-bottom: -2px;
+        }
+        
+        .tab-button.active {
+            color: #5B50C1;
+            border-bottom-color: #5B50C1;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
         .form-group {
             display: flex;
             flex-direction: column;
@@ -587,6 +620,7 @@
         .table td {
             padding: 12px;
             border-bottom: 1px solid #e2e8f0;
+            word-break: break-word;
         }
         
         @media (max-width: 640px) {
@@ -689,19 +723,33 @@
                 
                 <div class="form-section">
                     <div class="form-title">本日の記録</div>
-                    <form onsubmit="handleSubmit(event)">
-                        <div class="form-group">
-                            <label class="form-label">売上金額</label>
-                            <input type="number" id="revenueAmount" class="form-control" placeholder="0" step="100">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">支出金額</label>
-                            <input type="number" id="expenseAmount" class="form-control" placeholder="0" step="100">
-                        </div>
-                        
-                        <button type="submit" class="btn-primary">記録する</button>
-                    </form>
+                    
+                    <div class="tab-buttons">
+                        <button class="tab-button active" onclick="switchTab('revenue-tab')">📈 売上を記録</button>
+                        <button class="tab-button" onclick="switchTab('expense-tab')">📉 支出を記録</button>
+                    </div>
+                    
+                    <!-- 売上タブ -->
+                    <div id="revenue-tab" class="tab-content active">
+                        <form onsubmit="handleRevenueSubmit(event)">
+                            <div class="form-group">
+                                <label class="form-label">売上金額</label>
+                                <input type="number" id="revenueAmount" class="form-control" placeholder="0" step="100">
+                            </div>
+                            <button type="submit" class="btn-primary">売上を記録</button>
+                        </form>
+                    </div>
+                    
+                    <!-- 支出タブ -->
+                    <div id="expense-tab" class="tab-content">
+                        <form onsubmit="handleExpenseSubmit(event)">
+                            <div class="form-group">
+                                <label class="form-label">支出金額</label>
+                                <input type="number" id="expenseAmount" class="form-control" placeholder="0" step="100">
+                            </div>
+                            <button type="submit" class="btn-primary">支出を記録</button>
+                        </form>
+                    </div>
                 </div>
             </div>
             
@@ -919,14 +967,66 @@
         let currentCalendarDate = new Date();
         
         const Storage = {
-            getDailyHistory: () => JSON.parse(localStorage.getItem('daily_history') || '{}'),
-            setDailyHistory: (data) => localStorage.setItem('daily_history', JSON.stringify(data)),
-            getRecurringIncome: () => JSON.parse(localStorage.getItem('recurring_income') || '[]'),
-            setRecurringIncome: (data) => localStorage.setItem('recurring_income', JSON.stringify(data)),
-            getRecurringExpense: () => JSON.parse(localStorage.getItem('recurring_expense') || '[]'),
-            setRecurringExpense: (data) => localStorage.setItem('recurring_expense', JSON.stringify(data)),
-            getTargets: () => JSON.parse(localStorage.getItem('targets') || '{}'),
-            setTargets: (data) => localStorage.setItem('targets', JSON.stringify(data)),
+            getDailyHistory: () => {
+                try {
+                    return JSON.parse(localStorage.getItem('daily_history') || '{}');
+                } catch (e) {
+                    console.error('Failed to parse daily_history:', e);
+                    return {};
+                }
+            },
+            setDailyHistory: (data) => {
+                try {
+                    localStorage.setItem('daily_history', JSON.stringify(data));
+                } catch (e) {
+                    console.error('Failed to save daily_history:', e);
+                }
+            },
+            getRecurringIncome: () => {
+                try {
+                    return JSON.parse(localStorage.getItem('recurring_income') || '[]');
+                } catch (e) {
+                    console.error('Failed to parse recurring_income:', e);
+                    return [];
+                }
+            },
+            setRecurringIncome: (data) => {
+                try {
+                    localStorage.setItem('recurring_income', JSON.stringify(data));
+                } catch (e) {
+                    console.error('Failed to save recurring_income:', e);
+                }
+            },
+            getRecurringExpense: () => {
+                try {
+                    return JSON.parse(localStorage.getItem('recurring_expense') || '[]');
+                } catch (e) {
+                    console.error('Failed to parse recurring_expense:', e);
+                    return [];
+                }
+            },
+            setRecurringExpense: (data) => {
+                try {
+                    localStorage.setItem('recurring_expense', JSON.stringify(data));
+                } catch (e) {
+                    console.error('Failed to save recurring_expense:', e);
+                }
+            },
+            getTargets: () => {
+                try {
+                    return JSON.parse(localStorage.getItem('targets') || '{}');
+                } catch (e) {
+                    console.error('Failed to parse targets:', e);
+                    return {};
+                }
+            },
+            setTargets: (data) => {
+                try {
+                    localStorage.setItem('targets', JSON.stringify(data));
+                } catch (e) {
+                    console.error('Failed to save targets:', e);
+                }
+            },
         };
         
         function formatCurrency(value) {
@@ -942,6 +1042,14 @@
             alert.textContent = msg;
             alert.className = 'alert show success';
             setTimeout(() => alert.classList.remove('show'), 3000);
+        }
+        
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
         }
         
         function getRecurringForDate(date) {
@@ -1106,24 +1214,38 @@
             document.getElementById('recurringExpenseList').innerHTML = expenseHtml || '<tr><td colspan="5" style="text-align: center; color: #a0aec0;">登録済みの定期支出がありません</td></tr>';
         }
         
-        function handleSubmit(e) {
+        function handleRevenueSubmit(e) {
             e.preventDefault();
             
             const revenue = Number(document.getElementById('revenueAmount').value) || 0;
+            
+            const today = formatDate(new Date());
+            const history = Storage.getDailyHistory();
+            
+            history[today] = history[today] || { revenue: 0, expense: 0 };
+            history[today].revenue = revenue;
+            Storage.setDailyHistory(history);
+            
+            updateDisplay();
+            updateCalendar();
+            showMessage('売上を記録しました');
+        }
+        
+        function handleExpenseSubmit(e) {
+            e.preventDefault();
+            
             const expense = Number(document.getElementById('expenseAmount').value) || 0;
             
             const today = formatDate(new Date());
             const history = Storage.getDailyHistory();
             
-            history[today] = { revenue, expense };
+            history[today] = history[today] || { revenue: 0, expense: 0 };
+            history[today].expense = expense;
             Storage.setDailyHistory(history);
-            
-            document.getElementById('revenueAmount').value = '';
-            document.getElementById('expenseAmount').value = '';
             
             updateDisplay();
             updateCalendar();
-            showMessage('記録を保存しました');
+            showMessage('支出を記録しました');
         }
         
         function handleRecurringIncomeSubmit(e) {
@@ -1140,7 +1262,7 @@
             }
             
             const recurring = Storage.getRecurringIncome();
-            recurring.push({ name, amount: Number(amount), cycle, date: Number(date) });
+            recurring.push({ name: String(name), amount: Number(amount), cycle, date: Number(date) });
             Storage.setRecurringIncome(recurring);
             
             document.getElementById('recurringIncomeName').value = '';
@@ -1167,7 +1289,7 @@
             }
             
             const recurring = Storage.getRecurringExpense();
-            recurring.push({ name, amount: Number(amount), cycle, date: Number(date) });
+            recurring.push({ name: String(name), amount: Number(amount), cycle, date: Number(date) });
             Storage.setRecurringExpense(recurring);
             
             document.getElementById('recurringExpenseName').value = '';
@@ -1281,10 +1403,10 @@
             
             try {
                 const data = JSON.parse(json);
-                localStorage.setItem('daily_history', JSON.stringify(data.daily_history || {}));
-                localStorage.setItem('recurring_income', JSON.stringify(data.recurring_income || []));
-                localStorage.setItem('recurring_expense', JSON.stringify(data.recurring_expense || []));
-                localStorage.setItem('targets', JSON.stringify(data.targets || {}));
+                Storage.setDailyHistory(data.daily_history || {});
+                Storage.setRecurringIncome(data.recurring_income || []);
+                Storage.setRecurringExpense(data.recurring_expense || []);
+                Storage.setTargets(data.targets || {});
                 
                 updateDisplay();
                 showMessage('復元しました');
