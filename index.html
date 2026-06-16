@@ -667,6 +667,137 @@
                 gap: 16px;
             }
         }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        @media (max-width: 640px) {
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+                border-radius: 12px;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #718096;
+        }
+        
+        .detail-section {
+            margin-bottom: 20px;
+        }
+        
+        .detail-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #718096;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+        
+        .detail-item-label {
+            color: #4a5568;
+        }
+        
+        .detail-item-value {
+            font-weight: 600;
+            color: #1a202c;
+        }
+        
+        .detail-item.revenue .detail-item-value {
+            color: #06A77D;
+        }
+        
+        .detail-item.expense .detail-item-value {
+            color: #FF6B35;
+        }
+        
+        .detail-summary {
+            background: linear-gradient(135deg, #f8f9fc 0%, #edf2f7 100%);
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 16px;
+        }
+        
+        .detail-summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        
+        .detail-summary-item.total {
+            border-top: 2px solid #cbd5e0;
+            padding-top: 12px;
+            margin-top: 12px;
+            font-size: 16px;
+        }
+        
+        .detail-summary-item.profit {
+            color: #5B50C1;
+        }
+        
+        .calendar-day.clickable {
+            cursor: pointer;
+        }
+        
+        .calendar-day.clickable:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
     </style>
 </head>
 <body>
@@ -959,6 +1090,18 @@
         </div>
     </div>
     
+    <!-- 日付詳細モーダル -->
+    <div id="dayDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalDate" class="modal-title">2026年6月17日</h2>
+                <button class="modal-close" onclick="closeDayDetail()">×</button>
+            </div>
+            
+            <div id="modalBody"></div>
+        </div>
+    </div>
+    
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./service-worker.js').catch(() => {});
@@ -1167,8 +1310,9 @@
                     }
                 }
                 
+                const dateStr = formatDate(date);
                 html += `
-                    <div class="calendar-day ${statusClass} ${isOtherMonth ? 'other-month' : ''}">
+                    <div class="calendar-day ${statusClass} ${isOtherMonth ? 'other-month' : 'clickable'}" onclick="${isOtherMonth ? '' : `showDayDetail('${dateStr}')`}">
                         <div class="calendar-day-date">${date.getDate()}</div>
                         <div class="calendar-day-amount">${balance > 0 ? '+' : ''}${formatCurrency(balance)}</div>
                     </div>
@@ -1419,6 +1563,111 @@
         window.addEventListener('DOMContentLoaded', () => {
             updateDisplay();
             updateRecurringLists();
+        });
+        
+        function showDayDetail(dateStr) {
+            const [year, month, day] = dateStr.split('-');
+            const date = new Date(year, month - 1, day);
+            
+            // 日付フォーマット
+            const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+            const dateLabel = `${year}年${monthNames[date.getMonth()]}${date.getDate()}日 (${dayNames[date.getDay()]})`;
+            
+            // 履歴を取得
+            const history = Storage.getDailyHistory();
+            const record = history[dateStr] || { revenue: 0, expense: 0 };
+            
+            // 定期分を取得
+            const recurring = getRecurringForDate(date);
+            
+            // 定期収入の詳細
+            let recurringIncomeHtml = '';
+            const incomes = Storage.getRecurringIncome();
+            const dateNum = date.getDate();
+            incomes.forEach(item => {
+                if (item.cycle === 'monthly' && item.date === dateNum) {
+                    recurringIncomeHtml += `<div class="detail-item revenue"><div class="detail-item-label">${item.name}</div><div class="detail-item-value">${formatCurrency(item.amount)}</div></div>`;
+                }
+            });
+            
+            // 定期支出の詳細
+            let recurringExpenseHtml = '';
+            const expenses = Storage.getRecurringExpense();
+            expenses.forEach(item => {
+                if (item.cycle === 'monthly' && item.date === dateNum) {
+                    recurringExpenseHtml += `<div class="detail-item expense"><div class="detail-item-label">${item.name}</div><div class="detail-item-value">${formatCurrency(item.amount)}</div></div>`;
+                }
+            });
+            
+            // 合計
+            const totalRevenue = record.revenue + recurring.revenue;
+            const totalExpense = record.expense + recurring.expense;
+            const profit = totalRevenue - totalExpense;
+            
+            // モーダルコンテンツを構築
+            let modalHtml = '';
+            
+            // 収入セクション
+            modalHtml += `<div class="detail-section">
+                <div class="detail-section-title">📈 収入</div>`;
+            if (record.revenue > 0) {
+                modalHtml += `<div class="detail-item revenue"><div class="detail-item-label">手入力売上</div><div class="detail-item-value">${formatCurrency(record.revenue)}</div></div>`;
+            }
+            if (recurringIncomeHtml) {
+                modalHtml += recurringIncomeHtml;
+            }
+            modalHtml += `<div class="detail-item" style="border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px; font-weight: 600;">
+                <div class="detail-item-label">合計売上</div>
+                <div class="detail-item-value" style="color: #06A77D;">${formatCurrency(totalRevenue)}</div>
+            </div></div>`;
+            
+            // 支出セクション
+            modalHtml += `<div class="detail-section">
+                <div class="detail-section-title">📉 支出</div>`;
+            if (record.expense > 0) {
+                modalHtml += `<div class="detail-item expense"><div class="detail-item-label">手入力支出</div><div class="detail-item-value">${formatCurrency(record.expense)}</div></div>`;
+            }
+            if (recurringExpenseHtml) {
+                modalHtml += recurringExpenseHtml;
+            }
+            modalHtml += `<div class="detail-item" style="border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px; font-weight: 600;">
+                <div class="detail-item-label">合計支出</div>
+                <div class="detail-item-value" style="color: #FF6B35;">${formatCurrency(totalExpense)}</div>
+            </div></div>`;
+            
+            // 利益サマリー
+            modalHtml += `<div class="detail-summary">
+                <div class="detail-summary-item">
+                    <span>売上</span>
+                    <span style="color: #06A77D;">${formatCurrency(totalRevenue)}</span>
+                </div>
+                <div class="detail-summary-item">
+                    <span>支出</span>
+                    <span style="color: #FF6B35;">${formatCurrency(totalExpense)}</span>
+                </div>
+                <div class="detail-summary-item total profit">
+                    <span>利益</span>
+                    <span>${formatCurrency(profit)}</span>
+                </div>
+            </div>`;
+            
+            // モーダルを表示
+            document.getElementById('modalDate').textContent = dateLabel;
+            document.getElementById('modalBody').innerHTML = modalHtml;
+            document.getElementById('dayDetailModal').classList.add('show');
+        }
+        
+        function closeDayDetail() {
+            document.getElementById('dayDetailModal').classList.remove('show');
+        }
+        
+        // モーダル外クリックで閉じる
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('dayDetailModal');
+            if (e.target === modal) {
+                closeDayDetail();
+            }
         });
     </script>
 </body>
