@@ -862,24 +862,44 @@
                     
                     <!-- 売上タブ -->
                     <div id="revenue-tab" class="tab-content active">
-                        <form onsubmit="handleRevenueSubmit(event)">
+                        <form onsubmit="handleRevenueItemSubmit(event)">
                             <div class="form-group">
-                                <label class="form-label">売上金額</label>
-                                <input type="number" id="revenueAmount" class="form-control" placeholder="0" step="100">
+                                <label class="form-label">売上項目名</label>
+                                <input type="text" id="revenueItemName" class="form-control" placeholder="例：愛しトーク、WAVE ORACLE">
                             </div>
-                            <button type="submit" class="btn-primary">売上を記録</button>
+                            <div class="form-group">
+                                <label class="form-label">金額</label>
+                                <input type="number" id="revenueItemAmount" class="form-control" placeholder="0" step="100">
+                            </div>
+                            <button type="submit" class="btn-primary">項目を追加</button>
                         </form>
+                        
+                        <div id="revenueItemsList" style="margin-top: 20px;"></div>
+                        <div id="revenueSummary" style="margin-top: 16px; padding: 16px; background: #c6f6d5; border-radius: 10px; display: none;">
+                            <div style="font-size: 12px; color: #22543d; font-weight: 600; margin-bottom: 8px;">本日の売上合計</div>
+                            <div id="revenueTotalAmount" style="font-size: 24px; font-weight: 700; color: #06A77D;">¥0</div>
+                        </div>
                     </div>
                     
                     <!-- 支出タブ -->
                     <div id="expense-tab" class="tab-content">
-                        <form onsubmit="handleExpenseSubmit(event)">
+                        <form onsubmit="handleExpenseItemSubmit(event)">
                             <div class="form-group">
-                                <label class="form-label">支出金額</label>
-                                <input type="number" id="expenseAmount" class="form-control" placeholder="0" step="100">
+                                <label class="form-label">支出項目名</label>
+                                <input type="text" id="expenseItemName" class="form-control" placeholder="例：食費、交通費">
                             </div>
-                            <button type="submit" class="btn-primary">支出を記録</button>
+                            <div class="form-group">
+                                <label class="form-label">金額</label>
+                                <input type="number" id="expenseItemAmount" class="form-control" placeholder="0" step="100">
+                            </div>
+                            <button type="submit" class="btn-primary">項目を追加</button>
                         </form>
+                        
+                        <div id="expenseItemsList" style="margin-top: 20px;"></div>
+                        <div id="expenseSummary" style="margin-top: 16px; padding: 16px; background: #fed7d7; border-radius: 10px; display: none;">
+                            <div style="font-size: 12px; color: #742a2a; font-weight: 600; margin-bottom: 8px;">本日の支出合計</div>
+                            <div id="expenseTotalAmount" style="font-size: 24px; font-weight: 700; color: #FF6B35;">¥0</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1233,11 +1253,30 @@
         function getDayDetails(date) {
             const dateStr = formatDate(date);
             const history = Storage.getDailyHistory();
-            const record = history[dateStr] || { revenue: 0, expense: 0 };
+            const record = history[dateStr];
+            
+            let manualRevenue = 0;
+            if (record) {
+                if (Array.isArray(record.revenue)) {
+                    manualRevenue = record.revenue.reduce((sum, item) => sum + (item.amount || 0), 0);
+                } else if (typeof record.revenue === 'number') {
+                    manualRevenue = record.revenue;
+                }
+            }
+            
+            let manualExpense = 0;
+            if (record) {
+                if (Array.isArray(record.expense)) {
+                    manualExpense = record.expense.reduce((sum, item) => sum + (item.amount || 0), 0);
+                } else if (typeof record.expense === 'number') {
+                    manualExpense = record.expense;
+                }
+            }
+            
             const recurring = getRecurringForDate(date);
             
-            const totalRevenue = record.revenue + recurring.revenue;
-            const totalExpense = record.expense + recurring.expense;
+            const totalRevenue = manualRevenue + recurring.revenue;
+            const totalExpense = manualExpense + recurring.expense;
             
             return { revenue: totalRevenue, expense: totalExpense };
         }
@@ -1358,38 +1397,182 @@
             document.getElementById('recurringExpenseList').innerHTML = expenseHtml || '<tr><td colspan="5" style="text-align: center; color: #a0aec0;">登録済みの定期支出がありません</td></tr>';
         }
         
-        function handleRevenueSubmit(e) {
+        function handleRevenueItemSubmit(e) {
             e.preventDefault();
             
-            const revenue = Number(document.getElementById('revenueAmount').value) || 0;
+            const name = document.getElementById('revenueItemName').value.trim();
+            const amount = Number(document.getElementById('revenueItemAmount').value) || 0;
+            
+            if (!name) {
+                alert('項目名を入力してください');
+                return;
+            }
+            
+            if (amount <= 0) {
+                alert('金額を入力してください');
+                return;
+            }
             
             const today = formatDate(new Date());
             const history = Storage.getDailyHistory();
             
-            history[today] = history[today] || { revenue: 0, expense: 0 };
-            history[today].revenue = revenue;
+            if (!history[today]) {
+                history[today] = { revenue: [], expense: [] };
+            }
+            
+            // 配列形式に対応
+            if (!Array.isArray(history[today].revenue)) {
+                history[today].revenue = [];
+            }
+            
+            history[today].revenue.push({ name, amount });
             Storage.setDailyHistory(history);
             
+            document.getElementById('revenueItemName').value = '';
+            document.getElementById('revenueItemAmount').value = '';
+            
+            updateRevenueList();
             updateDisplay();
             updateCalendar();
-            showMessage('売上を記録しました');
+            showMessage('売上項目を追加しました');
         }
         
-        function handleExpenseSubmit(e) {
+        function updateRevenueList() {
+            const today = formatDate(new Date());
+            const history = Storage.getDailyHistory();
+            const record = history[today];
+            
+            const revenue = Array.isArray(record?.revenue) ? record.revenue : [];
+            
+            let html = '';
+            let totalAmount = 0;
+            
+            revenue.forEach((item, idx) => {
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f0fdf4; border-left: 4px solid #06A77D; border-radius: 8px; margin-bottom: 8px;">
+                        <div>
+                            <div style="font-weight: 600; color: #1a202c;">${item.name}</div>
+                            <div style="font-size: 12px; color: #718096;">${formatCurrency(item.amount)}</div>
+                        </div>
+                        <button type="button" onclick="deleteRevenueItem(${idx})" class="btn-danger">削除</button>
+                    </div>
+                `;
+                totalAmount += item.amount;
+            });
+            
+            document.getElementById('revenueItemsList').innerHTML = html;
+            
+            if (revenue.length > 0) {
+                document.getElementById('revenueSummary').style.display = 'block';
+                document.getElementById('revenueTotalAmount').textContent = formatCurrency(totalAmount);
+            } else {
+                document.getElementById('revenueSummary').style.display = 'none';
+            }
+        }
+        
+        function deleteRevenueItem(idx) {
+            if (confirm('削除しますか？')) {
+                const today = formatDate(new Date());
+                const history = Storage.getDailyHistory();
+                
+                if (history[today] && Array.isArray(history[today].revenue)) {
+                    history[today].revenue.splice(idx, 1);
+                    Storage.setDailyHistory(history);
+                    updateRevenueList();
+                    updateDisplay();
+                    updateCalendar();
+                    showMessage('削除しました');
+                }
+            }
+        }
+        
+        function handleExpenseItemSubmit(e) {
             e.preventDefault();
             
-            const expense = Number(document.getElementById('expenseAmount').value) || 0;
+            const name = document.getElementById('expenseItemName').value.trim();
+            const amount = Number(document.getElementById('expenseItemAmount').value) || 0;
+            
+            if (!name) {
+                alert('項目名を入力してください');
+                return;
+            }
+            
+            if (amount <= 0) {
+                alert('金額を入力してください');
+                return;
+            }
             
             const today = formatDate(new Date());
             const history = Storage.getDailyHistory();
             
-            history[today] = history[today] || { revenue: 0, expense: 0 };
-            history[today].expense = expense;
+            if (!history[today]) {
+                history[today] = { revenue: [], expense: [] };
+            }
+            
+            // 配列形式に対応
+            if (!Array.isArray(history[today].expense)) {
+                history[today].expense = [];
+            }
+            
+            history[today].expense.push({ name, amount });
             Storage.setDailyHistory(history);
             
+            document.getElementById('expenseItemName').value = '';
+            document.getElementById('expenseItemAmount').value = '';
+            
+            updateExpenseList();
             updateDisplay();
             updateCalendar();
-            showMessage('支出を記録しました');
+            showMessage('支出項目を追加しました');
+        }
+        
+        function updateExpenseList() {
+            const today = formatDate(new Date());
+            const history = Storage.getDailyHistory();
+            const record = history[today];
+            
+            const expense = Array.isArray(record?.expense) ? record.expense : [];
+            
+            let html = '';
+            let totalAmount = 0;
+            
+            expense.forEach((item, idx) => {
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #fef2f2; border-left: 4px solid #FF6B35; border-radius: 8px; margin-bottom: 8px;">
+                        <div>
+                            <div style="font-weight: 600; color: #1a202c;">${item.name}</div>
+                            <div style="font-size: 12px; color: #718096;">${formatCurrency(item.amount)}</div>
+                        </div>
+                        <button type="button" onclick="deleteExpenseItem(${idx})" class="btn-danger">削除</button>
+                    </div>
+                `;
+                totalAmount += item.amount;
+            });
+            
+            document.getElementById('expenseItemsList').innerHTML = html;
+            
+            if (expense.length > 0) {
+                document.getElementById('expenseSummary').style.display = 'block';
+                document.getElementById('expenseTotalAmount').textContent = formatCurrency(totalAmount);
+            } else {
+                document.getElementById('expenseSummary').style.display = 'none';
+            }
+        }
+        
+        function deleteExpenseItem(idx) {
+            if (confirm('削除しますか？')) {
+                const today = formatDate(new Date());
+                const history = Storage.getDailyHistory();
+                
+                if (history[today] && Array.isArray(history[today].expense)) {
+                    history[today].expense.splice(idx, 1);
+                    Storage.setDailyHistory(history);
+                    updateExpenseList();
+                    updateDisplay();
+                    updateCalendar();
+                    showMessage('削除しました');
+                }
+            }
         }
         
         function handleRecurringIncomeSubmit(e) {
@@ -1563,6 +1746,8 @@
         window.addEventListener('DOMContentLoaded', () => {
             updateDisplay();
             updateRecurringLists();
+            updateRevenueList();
+            updateExpenseList();
         });
         
         function showDayDetail(dateStr) {
@@ -1576,7 +1761,33 @@
             
             // 履歴を取得
             const history = Storage.getDailyHistory();
-            const record = history[dateStr] || { revenue: 0, expense: 0 };
+            const record = history[dateStr];
+            
+            // 手入力売上（配列形式に対応）
+            let manualRevenue = 0;
+            let manualRevenueHtml = '';
+            if (record && Array.isArray(record.revenue)) {
+                record.revenue.forEach(item => {
+                    manualRevenueHtml += `<div class="detail-item revenue"><div class="detail-item-label">${item.name}</div><div class="detail-item-value">${formatCurrency(item.amount)}</div></div>`;
+                    manualRevenue += item.amount;
+                });
+            } else if (record && typeof record.revenue === 'number' && record.revenue > 0) {
+                manualRevenue = record.revenue;
+                manualRevenueHtml = `<div class="detail-item revenue"><div class="detail-item-label">手入力売上</div><div class="detail-item-value">${formatCurrency(record.revenue)}</div></div>`;
+            }
+            
+            // 手入力支出（配列形式に対応）
+            let manualExpense = 0;
+            let manualExpenseHtml = '';
+            if (record && Array.isArray(record.expense)) {
+                record.expense.forEach(item => {
+                    manualExpenseHtml += `<div class="detail-item expense"><div class="detail-item-label">${item.name}</div><div class="detail-item-value">${formatCurrency(item.amount)}</div></div>`;
+                    manualExpense += item.amount;
+                });
+            } else if (record && typeof record.expense === 'number' && record.expense > 0) {
+                manualExpense = record.expense;
+                manualExpenseHtml = `<div class="detail-item expense"><div class="detail-item-label">手入力支出</div><div class="detail-item-value">${formatCurrency(record.expense)}</div></div>`;
+            }
             
             // 定期分を取得
             const recurring = getRecurringForDate(date);
@@ -1601,8 +1812,8 @@
             });
             
             // 合計
-            const totalRevenue = record.revenue + recurring.revenue;
-            const totalExpense = record.expense + recurring.expense;
+            const totalRevenue = manualRevenue + recurring.revenue;
+            const totalExpense = manualExpense + recurring.expense;
             const profit = totalRevenue - totalExpense;
             
             // モーダルコンテンツを構築
@@ -1611,11 +1822,14 @@
             // 収入セクション
             modalHtml += `<div class="detail-section">
                 <div class="detail-section-title">📈 収入</div>`;
-            if (record.revenue > 0) {
-                modalHtml += `<div class="detail-item revenue"><div class="detail-item-label">手入力売上</div><div class="detail-item-value">${formatCurrency(record.revenue)}</div></div>`;
+            if (manualRevenueHtml) {
+                modalHtml += manualRevenueHtml;
             }
             if (recurringIncomeHtml) {
                 modalHtml += recurringIncomeHtml;
+            }
+            if (!manualRevenueHtml && !recurringIncomeHtml) {
+                modalHtml += `<div style="padding: 10px; color: #a0aec0; text-align: center;">なし</div>`;
             }
             modalHtml += `<div class="detail-item" style="border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px; font-weight: 600;">
                 <div class="detail-item-label">合計売上</div>
@@ -1625,11 +1839,14 @@
             // 支出セクション
             modalHtml += `<div class="detail-section">
                 <div class="detail-section-title">📉 支出</div>`;
-            if (record.expense > 0) {
-                modalHtml += `<div class="detail-item expense"><div class="detail-item-label">手入力支出</div><div class="detail-item-value">${formatCurrency(record.expense)}</div></div>`;
+            if (manualExpenseHtml) {
+                modalHtml += manualExpenseHtml;
             }
             if (recurringExpenseHtml) {
                 modalHtml += recurringExpenseHtml;
+            }
+            if (!manualExpenseHtml && !recurringExpenseHtml) {
+                modalHtml += `<div style="padding: 10px; color: #a0aec0; text-align: center;">なし</div>`;
             }
             modalHtml += `<div class="detail-item" style="border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px; font-weight: 600;">
                 <div class="detail-item-label">合計支出</div>
