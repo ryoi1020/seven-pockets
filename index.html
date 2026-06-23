@@ -923,6 +923,7 @@
         .form-control{
             border:1px solid var(--line-strong); border-radius:var(--r-md);
             background:var(--surface-2); color:var(--ink);
+            font-size:16px;  /* iOSのフォーカス時自動ズーム防止（16px未満で発生） */
             transition:border-color .15s, box-shadow .15s, background .15s;
         }
         .form-control:hover{ border-color:#D3D8E6; }
@@ -1494,7 +1495,7 @@
                         <details style="margin-top:16px;">
                             <summary style="cursor:pointer; color:#888FA6; font-size:13px; font-weight:600;">テキストを貼り付けて復元</summary>
                             <div class="form-group" style="margin-top:12px;">
-                                <textarea id="importText" class="form-control" style="min-height: 100px; font-family: monospace; font-size: 12px;" placeholder='{ "daily_history": ... }'></textarea>
+                                <textarea id="importText" class="form-control" style="min-height: 100px; font-family: monospace; font-size: 16px;" placeholder='{ "daily_history": ... }'></textarea>
                             </div>
                             <button class="btn-primary" onclick="importData()">貼り付けた内容で復元</button>
                         </details>
