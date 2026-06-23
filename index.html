@@ -1475,10 +1475,6 @@
                     <div class="form-title">☁️ クラウド同期</div>
                     <p style="color:#888FA6; font-size:13px; margin-bottom:16px;">合言葉ひとつで、複数の端末から同じデータを呼び出せます。データは端末側で暗号化してから保存されるので、サーバーにも中身は見えません。</p>
                     <div class="form-group">
-                        <label class="form-label">同期サーバーURL（Worker）</label>
-                        <input type="url" id="cloudUrl" class="form-control" placeholder="https://seven-pockets-sync.xxxx.workers.dev" autocapitalize="off" autocomplete="off">
-                    </div>
-                    <div class="form-group">
                         <label class="form-label">合言葉（パスフレーズ）</label>
                         <input type="password" id="cloudPass" class="form-control" placeholder="長めの自分だけの合言葉" autocomplete="off">
                     </div>
@@ -1491,6 +1487,13 @@
                         <button class="btn-primary" style="flex:1; min-width:150px; background:linear-gradient(135deg,#0E9E6B,#0B7E55); box-shadow:0 10px 20px -10px rgba(14,158,107,.6);" onclick="Cloud.loadNow()">⤓ クラウドから読み込み</button>
                     </div>
                     <div id="cloudStatus" style="margin-top:14px; font-size:13px; color:var(--muted);"></div>
+                    <details style="margin-top:16px;">
+                        <summary style="cursor:pointer; color:#888FA6; font-size:13px; font-weight:600;">同期サーバーの詳細設定（通常は変更不要）</summary>
+                        <div class="form-group" style="margin-top:12px;">
+                            <label class="form-label">同期サーバーURL（Worker）</label>
+                            <input type="url" id="cloudUrl" class="form-control" placeholder="https://seven-pockets-sync.xxxx.workers.dev" autocapitalize="off" autocomplete="off">
+                        </div>
+                    </details>
                 </div>
                 
                 <div class="data-grid">
@@ -2651,6 +2654,9 @@
         }
 
         // ===== クラウド同期（Cloudflare Workers + KV / 端末側でAES暗号化）=====
+        // デフォルトの同期サーバー（凌さんのWorker）。URL欄を空にしてもこれが使われます
+        const DEFAULT_CLOUD_URL = 'https://seven-pockets-sync.ryo-i1020gold.workers.dev';
+
         const Cloud = {
             _applying: false,
             _ready: false,
@@ -2658,7 +2664,7 @@
 
             cfg() {
                 return {
-                    url: (localStorage.getItem('cloud_url') || '').trim(),
+                    url: (localStorage.getItem('cloud_url') || DEFAULT_CLOUD_URL).trim(),
                     pass: (localStorage.getItem('cloud_pass') || ''),
                     auto: localStorage.getItem('cloud_auto') === '1'
                 };
