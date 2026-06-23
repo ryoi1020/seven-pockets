@@ -1,49 +1,50 @@
-const CACHE_NAME = 'seven-pockets-v3';
+const CACHE_NAME = 'seven-pockets-v4';
+const ASSETS = [
+    './',
+    './index.html',
+    './manifest.json',
+    './icon-192.png',
+    './icon-512.png',
+    './favicon.ico'
+];
 
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => {
-            return cache.addAll([
-                './',
-                './index.html',
-                './manifest.json',
-                './icon-192.png',
-                './icon-512.png',
-                './favicon.ico'
-            ]).catch(() => {
-                // ネットワークエラーの場合はスキップ
-            });
-        })
+        caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(() => {}))
     );
     self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
     event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
+        caches.keys().then(names =>
+            Promise.all(names.map(name => (name !== CACHE_NAME ? caches.delete(name) : null)))
+        )
     );
     self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request).then(response => {
-            return response || fetch(event.request).then(response => {
-                return caches.open(CACHE_NAME).then(cache => {
-                    cache.put(event.request, response.clone());
-                    return response;
-                });
-            });
-        }).catch(() => {
-            return caches.match('./index.html');
-        })
-    );
+    const req = event.request;
+    const isHTML = req.mode === 'navigate' || req.destination === 'document';
+
+    if (isHTML) {
+        // HTML はネットワーク優先：最新の index.html を常に取りに行き、失敗時のみキャッシュ
+        event.respondWith(
+            fetch(req).then(res => {
+                const copy = res.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
+                return res;
+            }).catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
+        );
+    } else {
+        // それ以外（アイコン等）はキャッシュ優先
+        event.respondWith(
+            caches.match(req).then(r => r || fetch(req).then(res => {
+                const copy = res.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
+                return res;
+            }))
+        );
+    }
 });
