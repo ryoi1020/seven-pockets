@@ -218,12 +218,15 @@
             font-weight: 600;
             color: #718096;
             margin-bottom: 8px;
+            line-height: 1.35;
+            min-height: calc(1.35em * 2);
         }
         
         @media (max-width: 640px) {
             .summary-label {
                 font-size: 11px;
                 margin-bottom: 6px;
+                min-height: calc(1.35em * 2);
             }
         }
         
@@ -231,6 +234,13 @@
             font-size: 28px;
             font-weight: 700;
             margin-bottom: 8px;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+        }
+        .num {
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+            text-align: right;
         }
         
         @media (max-width: 640px) {
@@ -798,6 +808,14 @@
             transform: scale(1.05);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
+        .summary-value { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+        .amt-row { display: flex; align-items: center; gap: 10px; }
+        .amt-row .amt-main { flex: 1; min-width: 0; word-break: break-word; }
+        .amt-row .amt-val { flex-shrink: 0; min-width: 104px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+        .amt-row .amt-act { flex-shrink: 0; }
+        .revenue-chip { background: #EDF2F7; border: 1px solid #E2E8F0; color: #2D3748; border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+        .revenue-chip:hover { background: #E2E8F0; }
+        .num, .detail-item-value, .calendar-day-amount { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
     </style>
 </head>
 <body>
@@ -816,6 +834,9 @@
                 </div>
                 <div class="nav-item" onclick="switchPage('targets')">
                     <span class="nav-item-icon">🎯</span>月間目標<div class="nav-item-desc">売上目標を設定</div>
+                </div>
+                <div class="nav-item" onclick="switchPage('accounts')">
+                    <span class="nav-item-icon">🏦</span>口座・資産<div class="nav-item-desc">現金・純資産を管理</div>
                 </div>
                 <div class="nav-item" onclick="switchPage('data')">
                     <span class="nav-item-icon">💾</span>データ管理<div class="nav-item-desc">バックアップ・復元</div>
@@ -865,6 +886,7 @@
                         <form onsubmit="handleRevenueItemSubmit(event)">
                             <div class="form-group">
                                 <label class="form-label">売上項目名</label>
+                                <div id="revenueItemChips" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
                                 <input type="text" id="revenueItemName" class="form-control" placeholder="例：愛しトーク、WAVE ORACLE">
                             </div>
                             <div class="form-group">
@@ -1046,20 +1068,138 @@
             <div id="targets" class="content">
                 <div class="header">
                     <h1>月間目標</h1>
-                    <p>売上目標を設定</p>
+                    <p>収益源ごとに目標と進捗を管理</p>
                 </div>
-                
+
                 <div class="form-section">
-                    <form onsubmit="handleTargetSubmit(event)">
-                        <div class="form-group">
-                            <label class="form-label">月間売上目標</label>
-                            <input type="number" id="targetRevenue" class="form-control" placeholder="0" step="10000">
-                        </div>
-                        <button type="submit" class="btn-primary">保存</button>
-                    </form>
+                    <div class="form-title">🎯 収益源ごとの月間目標</div>
+                    <p style="color:#718096; font-size:13px; margin-bottom:16px;">「本日の記録」で使った売上項目ごとに、今月の目標と進捗を表示します。</p>
+                    <div id="targetItemsContainer"></div>
+                    <button class="btn-primary" style="margin-top:16px;" onclick="saveItemTargets()">目標を保存</button>
                 </div>
             </div>
             
+            <!-- Accounts / Assets -->
+            <div id="accounts" class="content">
+                <div class="header">
+                    <h1>口座・資産</h1>
+                    <p>現金残高と取得記録を管理</p>
+                </div>
+
+                <!-- 純資産サマリー -->
+                <div class="summary-section" id="networthSummary" style="margin-bottom: 20px;">
+                    <div class="summary-card">
+                        <div class="summary-label">合計（現金＋投資元本）</div>
+                        <div class="summary-value" id="nwTotal" style="color:#2D3748;">¥0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">現金合計</div>
+                        <div class="summary-value" id="nwCash" style="color:#06A77D;">¥0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">投資元本（取得額累計）</div>
+                        <div class="summary-value" id="nwAssets" style="color:#5A67D8;">¥0</div>
+                    </div>
+                </div>
+
+                <!-- 口座追加フォーム -->
+                <div class="form-section">
+                    <div class="form-title">🏦 口座を追加</div>
+                    <form onsubmit="handleAccountSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">口座名</label>
+                            <input type="text" id="accountName" class="form-control" placeholder="例：楽天銀行、楽天証券、財布" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">種別</label>
+                            <select id="accountType" class="form-control">
+                                <option value="bank">🏦 銀行</option>
+                                <option value="securities">📈 証券</option>
+                                <option value="cash">💵 現金</option>
+                                <option value="emoney">💳 電子マネー</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">現在の現金残高（円）</label>
+                            <input type="number" id="accountBalance" class="form-control" placeholder="0" step="1">
+                        </div>
+                        <button type="submit" class="btn-primary">追加</button>
+                    </form>
+                </div>
+
+                <!-- 口座一覧 -->
+                <div class="form-section">
+                    <div class="form-title">📋 口座一覧</div>
+                    <p style="color:#718096; font-size:13px; margin-bottom:12px;">残高はその場で編集できます。</p>
+                    <div id="accountList"></div>
+                </div>
+
+                <!-- 取得記録（買った履歴）の追加 -->
+                <div class="form-section">
+                    <div class="form-title">📈 取得記録を追加</div>
+                    <p style="color:#718096; font-size:13px; margin-bottom:16px;">「いつ・何を・いくらで買ったか」を記録します。数量・単価は任意です。</p>
+                    <form onsubmit="handleHoldingSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">買った日</label>
+                            <input type="date" id="holdDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">銘柄名</label>
+                            <input type="text" id="holdName" class="form-control" placeholder="例：eMAXIS Slim S&P500、トヨタ自動車、VOO" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">取得金額（円）</label>
+                            <input type="number" id="holdAmount" class="form-control" placeholder="例：50000" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">区分</label>
+                            <select id="holdKind" class="form-control">
+                                <option value="tsumitate">🔁 定期積立</option>
+                                <option value="spot">⚡ スポット購入</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">資産クラス（任意）</label>
+                            <select id="holdClass" class="form-control">
+                                <option value="">未設定</option>
+                                <option value="jp_stock">日本株</option>
+                                <option value="us_stock">米国株</option>
+                                <option value="etf">ETF</option>
+                                <option value="fund">投資信託</option>
+                                <option value="other">その他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">口座（任意）</label>
+                            <select id="holdAccount" class="form-control"><option value="">未設定</option></select>
+                        </div>
+                        <div style="display:flex; gap:12px;">
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">数量（任意）</label>
+                                <input type="number" id="holdQty" class="form-control" placeholder="株 / 口" step="any">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">取得単価（任意）</label>
+                                <input type="number" id="holdUnit" class="form-control" placeholder="0" step="any">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">記録する</button>
+                    </form>
+                </div>
+
+                <!-- 銘柄ごとのサマリー -->
+                <div class="form-section">
+                    <div class="form-title">💼 保有サマリー（銘柄別）</div>
+                    <div id="holdingsSummary"></div>
+                </div>
+
+                <!-- 取得記録の一覧 -->
+                <div class="form-section">
+                    <div class="form-title">🧾 取得記録（履歴）</div>
+                    <div id="holdingsList"></div>
+                </div>
+            </div>
+
             <!-- Data -->
             <div id="data" class="content">
                 <div class="header">
@@ -1103,6 +1243,10 @@
         <div class="bottom-nav-item" onclick="switchPage('targets')">
             <div class="nav-item-icon">🎯</div>
             <div class="nav-item-label">月間<br>目標</div>
+        </div>
+        <div class="bottom-nav-item" onclick="switchPage('accounts')">
+            <div class="nav-item-icon">🏦</div>
+            <div class="nav-item-label">口座<br>資産</div>
         </div>
         <div class="bottom-nav-item" onclick="switchPage('data')">
             <div class="nav-item-icon">💾</div>
@@ -1188,6 +1332,66 @@
                     localStorage.setItem('targets', JSON.stringify(data));
                 } catch (e) {
                     console.error('Failed to save targets:', e);
+                }
+            },
+            getAccounts: () => {
+                try {
+                    return JSON.parse(localStorage.getItem('accounts') || '[]');
+                } catch (e) {
+                    console.error('Failed to parse accounts:', e);
+                    return [];
+                }
+            },
+            setAccounts: (data) => {
+                try {
+                    localStorage.setItem('accounts', JSON.stringify(data));
+                } catch (e) {
+                    console.error('Failed to save accounts:', e);
+                }
+            },
+            getNetworthHistory: () => {
+                try {
+                    return JSON.parse(localStorage.getItem('networth_history') || '{}');
+                } catch (e) {
+                    console.error('Failed to parse networth_history:', e);
+                    return {};
+                }
+            },
+            setNetworthHistory: (data) => {
+                try {
+                    localStorage.setItem('networth_history', JSON.stringify(data));
+                } catch (e) {
+                    console.error('Failed to save networth_history:', e);
+                }
+            },
+            getHoldingsLog: () => {
+                try {
+                    return JSON.parse(localStorage.getItem('holdings_log') || '[]');
+                } catch (e) {
+                    console.error('Failed to parse holdings_log:', e);
+                    return [];
+                }
+            },
+            setHoldingsLog: (data) => {
+                try {
+                    localStorage.setItem('holdings_log', JSON.stringify(data));
+                } catch (e) {
+                    console.error('Failed to save holdings_log:', e);
+                }
+            },
+            getRevenueItems: () => {
+                try {
+                    return JSON.parse(localStorage.getItem('revenue_items') || '[]');
+                } catch (e) {
+                    console.error('Failed to parse revenue_items:', e);
+                    return [];
+                }
+            },
+            setRevenueItems: (data) => {
+                try {
+                    localStorage.setItem('revenue_items', JSON.stringify(data));
+                } catch (e) {
+                    console.error('Failed to save revenue_items:', e);
                 }
             },
         };
@@ -1427,6 +1631,8 @@
             
             history[today].revenue.push({ name, amount });
             Storage.setDailyHistory(history);
+            addRevenueItemName(name);
+            renderRevenueChips();
             
             document.getElementById('revenueItemName').value = '';
             document.getElementById('revenueItemAmount').value = '';
@@ -1437,6 +1643,31 @@
             showMessage('売上項目を追加しました');
         }
         
+        function addRevenueItemName(name) {
+            const items = Storage.getRevenueItems();
+            if (!items.includes(name)) {
+                items.push(name);
+                Storage.setRevenueItems(items);
+            }
+        }
+
+        function renderRevenueChips() {
+            const el = document.getElementById('revenueItemChips');
+            if (!el) return;
+            const items = Storage.getRevenueItems();
+            if (!items.length) { el.innerHTML = ''; return; }
+            el.innerHTML = items.map((n, i) =>
+                `<button type="button" class="revenue-chip" onclick="pickRevenueItem(${i})">${escapeHtml(n)}</button>`
+            ).join('');
+        }
+
+        function pickRevenueItem(i) {
+            const name = Storage.getRevenueItems()[i];
+            if (name == null) return;
+            document.getElementById('revenueItemName').value = name;
+            document.getElementById('revenueItemAmount').focus();
+        }
+
         function updateRevenueList() {
             const today = formatDate(new Date());
             const history = Storage.getDailyHistory();
@@ -1449,12 +1680,10 @@
             
             revenue.forEach((item, idx) => {
                 html += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f0fdf4; border-left: 4px solid #06A77D; border-radius: 8px; margin-bottom: 8px;">
-                        <div>
-                            <div style="font-weight: 600; color: #1a202c;">${item.name}</div>
-                            <div style="font-size: 12px; color: #718096;">${formatCurrency(item.amount)}</div>
-                        </div>
-                        <button type="button" onclick="deleteRevenueItem(${idx})" class="btn-danger">削除</button>
+                    <div class="amt-row" style="padding: 12px; background: #f0fdf4; border-left: 4px solid #06A77D; border-radius: 8px; margin-bottom: 8px;">
+                        <div class="amt-main" style="font-weight: 600; color: #1a202c;">${escapeHtml(item.name)}</div>
+                        <div class="amt-val" style="font-weight: 600; color: #06A77D;">${formatCurrency(item.amount)}</div>
+                        <button type="button" onclick="deleteRevenueItem(${idx})" class="btn-danger amt-act">削除</button>
                     </div>
                 `;
                 totalAmount += item.amount;
@@ -1538,12 +1767,10 @@
             
             expense.forEach((item, idx) => {
                 html += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #fef2f2; border-left: 4px solid #FF6B35; border-radius: 8px; margin-bottom: 8px;">
-                        <div>
-                            <div style="font-weight: 600; color: #1a202c;">${item.name}</div>
-                            <div style="font-size: 12px; color: #718096;">${formatCurrency(item.amount)}</div>
-                        </div>
-                        <button type="button" onclick="deleteExpenseItem(${idx})" class="btn-danger">削除</button>
+                    <div class="amt-row" style="padding: 12px; background: #fef2f2; border-left: 4px solid #FF6B35; border-radius: 8px; margin-bottom: 8px;">
+                        <div class="amt-main" style="font-weight: 600; color: #1a202c;">${escapeHtml(item.name)}</div>
+                        <div class="amt-val" style="font-weight: 600; color: #FF6B35;">${formatCurrency(item.amount)}</div>
+                        <button type="button" onclick="deleteExpenseItem(${idx})" class="btn-danger amt-act">削除</button>
                     </div>
                 `;
                 totalAmount += item.amount;
@@ -1653,15 +1880,75 @@
             }
         }
         
-        function handleTargetSubmit(e) {
-            e.preventDefault();
-            const revenue = document.getElementById('targetRevenue').value;
-            const targets = Storage.getTargets();
-            targets.monthly = Number(revenue);
-            Storage.setTargets(targets);
-            showMessage('目標値を保存しました');
+        // 収益源（売上項目）ごとの当月実績を集計
+        function getMonthlyRevenueByItem() {
+            const now = new Date();
+            const y = now.getFullYear(), m = now.getMonth() + 1;
+            const hist = Storage.getDailyHistory();
+            const out = {};
+            Object.keys(hist).forEach(d => {
+                const parts = d.split('-').map(Number);
+                if (parts[0] !== y || parts[1] !== m) return;
+                const rec = hist[d];
+                if (rec && Array.isArray(rec.revenue)) {
+                    rec.revenue.forEach(it => {
+                        if (it && it.name) out[it.name] = (out[it.name] || 0) + (Number(it.amount) || 0);
+                    });
+                }
+            });
+            return out;
         }
-        
+
+        function renderTargets() {
+            const cont = document.getElementById('targetItemsContainer');
+            if (!cont) return;
+            const items = Storage.getRevenueItems();
+            const targets = Storage.getTargets();
+            const itTargets = targets.items || {};
+            const actuals = getMonthlyRevenueByItem();
+
+            if (!items.length) {
+                cont.innerHTML = '<p style="color:#A0AEC0; font-size:14px;">まだ売上項目がありません。「本日の記録」で売上を追加すると、ここに収益源ごとの目標を設定できます。</p>';
+                return;
+            }
+            cont.innerHTML = items.map((n, i) => {
+                const tgt = Number(itTargets[n] || 0);
+                const act = Number(actuals[n] || 0);
+                const pct = tgt > 0 ? Math.min(100, Math.round(act / tgt * 100)) : 0;
+                const barColor = pct >= 100 ? '#06A77D' : '#5A67D8';
+                return `
+                <div style="padding:14px 0; border-bottom:1px solid #EDF2F7;">
+                    <div class="amt-row" style="margin-bottom:6px;">
+                        <div class="amt-main" style="font-weight:600; color:#2D3748;">${escapeHtml(n)}</div>
+                        <div class="amt-val" style="color:#718096; font-size:13px;">${formatCurrency(act)} / ${tgt > 0 ? formatCurrency(tgt) : '—'}</div>
+                    </div>
+                    <div style="height:8px; background:#EDF2F7; border-radius:999px; overflow:hidden; margin-bottom:10px;">
+                        <div style="height:100%; width:${pct}%; background:${barColor};"></div>
+                    </div>
+                    <div class="amt-row">
+                        <label class="amt-main" style="font-size:13px; color:#718096;">今月の目標</label>
+                        <input type="number" data-target-idx="${i}" value="${tgt || ''}" placeholder="0" step="10000" class="form-control amt-act" style="width:150px; text-align:right;">
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function saveItemTargets() {
+            const targets = Storage.getTargets();
+            const items = Storage.getRevenueItems();
+            const map = targets.items || {};
+            document.querySelectorAll('[data-target-idx]').forEach(inp => {
+                const name = items[Number(inp.getAttribute('data-target-idx'))];
+                if (name == null) return;
+                const v = Number(inp.value) || 0;
+                if (v > 0) map[name] = v; else delete map[name];
+            });
+            targets.items = map;
+            Storage.setTargets(targets);
+            renderTargets();
+            showMessage('目標を保存しました');
+        }
+
         function prevMonth() {
             currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
             updateCalendar();
@@ -1684,7 +1971,7 @@
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
             
-            const pages = ['dashboard', 'calendar', 'recurring', 'targets', 'data'];
+            const pages = ['dashboard', 'calendar', 'recurring', 'targets', 'accounts', 'data'];
             const pageIndex = pages.indexOf(pageId);
             
             if (pageIndex >= 0) {
@@ -1701,14 +1988,291 @@
             if (pageId === 'recurring') {
                 updateRecurringLists();
             }
+            if (pageId === 'accounts') {
+                renderAccounts();
+            }
+            if (pageId === 'targets') {
+                renderTargets();
+            }
         }
         
+        // ===== 口座・資産レイヤー（増分1）=====
+        function genId() {
+            return 'acc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+        }
+
+        // 非破壊マイグレーション：既存キーには一切触れず、新キーのみ補完
+        function migrateSchema() {
+            if (!localStorage.getItem('schema_version')) {
+                localStorage.setItem('schema_version', '2');
+            }
+            if (localStorage.getItem('accounts') === null) {
+                Storage.setAccounts([]);
+            }
+            if (localStorage.getItem('networth_history') === null) {
+                Storage.setNetworthHistory({});
+            }
+            if (localStorage.getItem('holdings_log') === null) {
+                Storage.setHoldingsLog([]);
+            }
+            if (localStorage.getItem('revenue_items') === null) {
+                // 既存の記録から売上項目名を拾って初期登録
+                const names = new Set();
+                const hist = Storage.getDailyHistory();
+                Object.values(hist).forEach(rec => {
+                    if (rec && Array.isArray(rec.revenue)) {
+                        rec.revenue.forEach(it => { if (it && it.name) names.add(it.name); });
+                    }
+                });
+                Storage.setRevenueItems([...names]);
+            }
+        }
+
+        function accountTypeLabel(type) {
+            return ({ bank: '🏦 銀行', securities: '📈 証券', cash: '💵 現金', emoney: '💳 電子マネー' })[type] || type;
+        }
+
+        function computeCashTotal() {
+            return Storage.getAccounts().reduce((s, a) => s + (Number(a.balance) || 0), 0);
+        }
+
+        // 投資元本＝取得記録の取得金額の累計（時価評価は持たない）
+        function computeAssetTotal() {
+            return Storage.getHoldingsLog().reduce((s, h) => s + (Number(h.amount) || 0), 0);
+        }
+
+        // 当日の純資産スナップショットを保存（推移トラッキングの種）
+        function recordNetworthSnapshot() {
+            const cash = computeCashTotal();
+            const assets = computeAssetTotal();
+            const hist = Storage.getNetworthHistory();
+            hist[formatDate(new Date())] = { cash, assets, total: cash + assets };
+            Storage.setNetworthHistory(hist);
+        }
+
+        function renderAccounts() {
+            const accounts = Storage.getAccounts();
+            const cash = computeCashTotal();
+            const assets = computeAssetTotal();
+            const elTotal = document.getElementById('nwTotal');
+            const elCash = document.getElementById('nwCash');
+            const elAssets = document.getElementById('nwAssets');
+            if (elTotal) elTotal.textContent = formatCurrency(cash + assets);
+            if (elCash) elCash.textContent = formatCurrency(cash);
+            if (elAssets) elAssets.textContent = formatCurrency(assets);
+
+            const list = document.getElementById('accountList');
+            if (!list) { populateHoldAccountSelect(); renderHoldings(); return; }
+            if (accounts.length === 0) {
+                list.innerHTML = '<p style="color:#A0AEC0; font-size:14px; padding:8px 0;">まだ口座がありません。上のフォームから追加してください。</p>';
+                populateHoldAccountSelect();
+                renderHoldings();
+                return;
+            }
+            list.innerHTML = accounts.map(a => `
+                <div style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #EDF2F7;">
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-weight:600; color:#2D3748; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(a.name)}</div>
+                        <div style="font-size:12px; color:#718096;">${accountTypeLabel(a.type)}</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="color:#718096; font-size:13px;">¥</span>
+                        <input type="number" value="${Number(a.balance) || 0}" step="1"
+                            onchange="updateAccountBalance('${a.id}', this.value)"
+                            class="form-control num" style="width:120px; padding:6px 8px;">
+                    </div>
+                    <button class="btn-danger" style="padding:6px 10px; font-size:12px;" onclick="deleteAccount('${a.id}')">削除</button>
+                </div>
+            `).join('');
+
+            populateHoldAccountSelect();
+            renderHoldings();
+        }
+
+        // ===== 取得記録（買った履歴）=====
+        const ASSET_CLASS_LABEL = { jp_stock: '日本株', us_stock: '米国株', etf: 'ETF', fund: '投資信託', other: 'その他', '': '' };
+
+        function accountName(id) {
+            const a = Storage.getAccounts().find(x => x.id === id);
+            return a ? a.name : '';
+        }
+
+        function populateHoldAccountSelect() {
+            const sel = document.getElementById('holdAccount');
+            if (!sel) return;
+            const cur = sel.value;
+            const opts = ['<option value="">未設定</option>']
+                .concat(Storage.getAccounts().map(a => `<option value="${a.id}">${escapeHtml(a.name)}</option>`));
+            sel.innerHTML = opts.join('');
+            sel.value = cur;
+        }
+
+        function handleHoldingSubmit(event) {
+            event.preventDefault();
+            const date = document.getElementById('holdDate').value || formatDate(new Date());
+            const name = document.getElementById('holdName').value.trim();
+            const amount = Number(document.getElementById('holdAmount').value) || 0;
+            const kind = document.getElementById('holdKind').value;
+            const assetClass = document.getElementById('holdClass').value;
+            const accountId = document.getElementById('holdAccount').value;
+            const qty = document.getElementById('holdQty').value;
+            const unit = document.getElementById('holdUnit').value;
+            if (!name || !amount) return;
+
+            const log = Storage.getHoldingsLog();
+            log.push({
+                id: 'hold_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                date, name, amount, kind, assetClass, accountId,
+                quantity: qty === '' ? null : Number(qty),
+                unitPrice: unit === '' ? null : Number(unit)
+            });
+            Storage.setHoldingsLog(log);
+            recordNetworthSnapshot();
+
+            // フォームを軽くリセット（日付・銘柄は残さずクリア）
+            document.getElementById('holdName').value = '';
+            document.getElementById('holdAmount').value = '';
+            document.getElementById('holdQty').value = '';
+            document.getElementById('holdUnit').value = '';
+            renderHoldings();
+            renderAccountSummaryOnly();
+            showMessage('取得記録を追加しました');
+        }
+
+        function deleteHolding(id) {
+            if (!confirm('この記録を削除しますか？')) return;
+            Storage.setHoldingsLog(Storage.getHoldingsLog().filter(h => h.id !== id));
+            recordNetworthSnapshot();
+            renderHoldings();
+            renderAccountSummaryOnly();
+            showMessage('削除しました');
+        }
+
+        // サマリー数値だけ更新（口座リストの再描画は不要なとき）
+        function renderAccountSummaryOnly() {
+            const cash = computeCashTotal(), assets = computeAssetTotal();
+            const t = document.getElementById('nwTotal'), c = document.getElementById('nwCash'), a = document.getElementById('nwAssets');
+            if (t) t.textContent = formatCurrency(cash + assets);
+            if (c) c.textContent = formatCurrency(cash);
+            if (a) a.textContent = formatCurrency(assets);
+        }
+
+        function renderHoldings() {
+            const log = Storage.getHoldingsLog().slice();
+
+            // 銘柄別サマリー
+            const sumEl = document.getElementById('holdingsSummary');
+            if (sumEl) {
+                if (log.length === 0) {
+                    sumEl.innerHTML = '<p style="color:#A0AEC0; font-size:14px;">まだ取得記録がありません。</p>';
+                } else {
+                    const byName = {};
+                    log.forEach(h => {
+                        if (!byName[h.name]) byName[h.name] = { name: h.name, total: 0, qty: 0, count: 0, hasQty: false, classes: new Set(), kinds: new Set() };
+                        const g = byName[h.name];
+                        g.total += Number(h.amount) || 0;
+                        g.count += 1;
+                        if (h.quantity != null) { g.qty += Number(h.quantity) || 0; g.hasQty = true; }
+                        if (h.assetClass) g.classes.add(ASSET_CLASS_LABEL[h.assetClass] || h.assetClass);
+                        g.kinds.add(h.kind === 'tsumitate' ? '積立' : 'スポット');
+                    });
+                    const groups = Object.values(byName).sort((a, b) => b.total - a.total);
+                    sumEl.innerHTML = groups.map(g => {
+                        const avg = g.hasQty && g.qty > 0 ? '　平均単価 ' + formatCurrency(g.total / g.qty) : '';
+                        const cls = g.classes.size ? `<span style="font-size:11px; color:#fff; background:#5A67D8; border-radius:4px; padding:1px 6px; margin-left:6px;">${[...g.classes].join('/')}</span>` : '';
+                        const kindBadge = [...g.kinds].map(k => `<span style="font-size:11px; color:${k === '積立' ? '#06A77D' : '#FF6B35'};">${k}</span>`).join(' ');
+                        return `
+                        <div style="padding:12px 0; border-bottom:1px solid #EDF2F7;">
+                            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">
+                                <div style="font-weight:600; color:#2D3748;">${escapeHtml(g.name)}${cls}</div>
+                                <div class="num" style="font-weight:700; color:#5A67D8; white-space:nowrap; min-width:110px; text-align:right;">${formatCurrency(g.total)}</div>
+                            </div>
+                            <div style="font-size:12px; color:#718096; margin-top:2px;">${g.count}回 ${kindBadge}${g.hasQty ? '　保有 ' + g.qty : ''}${avg}</div>
+                        </div>`;
+                    }).join('');
+                }
+            }
+
+            // 履歴一覧（新しい順）
+            const listEl = document.getElementById('holdingsList');
+            if (listEl) {
+                if (log.length === 0) {
+                    listEl.innerHTML = '<p style="color:#A0AEC0; font-size:14px;">記録はまだありません。</p>';
+                } else {
+                    const sorted = log.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+                    listEl.innerHTML = sorted.map(h => {
+                        const kind = h.kind === 'tsumitate'
+                            ? '<span style="font-size:11px; color:#fff; background:#06A77D; border-radius:4px; padding:1px 6px;">積立</span>'
+                            : '<span style="font-size:11px; color:#fff; background:#FF6B35; border-radius:4px; padding:1px 6px;">スポット</span>';
+                        const acc = h.accountId ? `　${escapeHtml(accountName(h.accountId))}` : '';
+                        const detail = (h.quantity != null || h.unitPrice != null)
+                            ? `<div style="font-size:11px; color:#A0AEC0;">${h.quantity != null ? h.quantity + '口/株' : ''}${h.unitPrice != null ? ' × ' + formatCurrency(h.unitPrice) : ''}</div>`
+                            : '';
+                        return `
+                        <div style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid #EDF2F7;">
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-weight:600; color:#2D3748;">${escapeHtml(h.name)} ${kind}</div>
+                                <div style="font-size:12px; color:#718096;">${h.date}${acc}</div>
+                                ${detail}
+                            </div>
+                            <div class="num" style="font-weight:600; color:#2D3748; white-space:nowrap; min-width:100px; text-align:right;">${formatCurrency(h.amount)}</div>
+                            <button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteHolding('${h.id}')">削除</button>
+                        </div>`;
+                    }).join('');
+                }
+            }
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        function handleAccountSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('accountName').value.trim();
+            const type = document.getElementById('accountType').value;
+            const balance = Number(document.getElementById('accountBalance').value) || 0;
+            if (!name) return;
+            const accounts = Storage.getAccounts();
+            accounts.push({ id: genId(), name, type, balance, assets: 0 });
+            Storage.setAccounts(accounts);
+            recordNetworthSnapshot();
+            document.getElementById('accountName').value = '';
+            document.getElementById('accountBalance').value = '';
+            renderAccounts();
+            showMessage('口座を追加しました');
+        }
+
+        function updateAccountBalance(id, value) {
+            const accounts = Storage.getAccounts();
+            const acc = accounts.find(a => a.id === id);
+            if (!acc) return;
+            acc.balance = Number(value) || 0;
+            Storage.setAccounts(accounts);
+            recordNetworthSnapshot();
+            renderAccounts();
+            showMessage('残高を更新しました');
+        }
+
+        function deleteAccount(id) {
+            if (!confirm('この口座を削除しますか？')) return;
+            Storage.setAccounts(Storage.getAccounts().filter(a => a.id !== id));
+            recordNetworthSnapshot();
+            renderAccounts();
+            showMessage('口座を削除しました');
+        }
+
         function exportData() {
             const data = {
                 daily_history: Storage.getDailyHistory(),
                 recurring_income: Storage.getRecurringIncome(),
                 recurring_expense: Storage.getRecurringExpense(),
                 targets: Storage.getTargets(),
+                accounts: Storage.getAccounts(),
+                networth_history: Storage.getNetworthHistory(),
+                holdings_log: Storage.getHoldingsLog(),
+                revenue_items: Storage.getRevenueItems(),
+                schema_version: 2,
                 exported_at: new Date().toISOString()
             };
             
@@ -1734,6 +2298,12 @@
                 Storage.setRecurringIncome(data.recurring_income || []);
                 Storage.setRecurringExpense(data.recurring_expense || []);
                 Storage.setTargets(data.targets || {});
+                // 新キーは「ファイルに含まれている場合のみ」上書き（旧バックアップで口座を消さない）
+                if (data.accounts !== undefined) Storage.setAccounts(data.accounts || []);
+                if (data.networth_history !== undefined) Storage.setNetworthHistory(data.networth_history || {});
+                if (data.holdings_log !== undefined) Storage.setHoldingsLog(data.holdings_log || []);
+                if (data.revenue_items !== undefined) Storage.setRevenueItems(data.revenue_items || []);
+                migrateSchema();
                 
                 updateDisplay();
                 showMessage('復元しました');
@@ -1744,10 +2314,16 @@
         }
         
         window.addEventListener('DOMContentLoaded', () => {
+            migrateSchema();
             updateDisplay();
             updateRecurringLists();
             updateRevenueList();
             updateExpenseList();
+            renderRevenueChips();
+            renderTargets();
+            renderAccounts();
+            const hd = document.getElementById('holdDate');
+            if (hd) hd.value = formatDate(new Date());
         });
         
         function showDayDetail(dateStr) {
