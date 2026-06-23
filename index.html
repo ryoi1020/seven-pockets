@@ -990,6 +990,7 @@
         .drop-zone-icon{ font-size:30px; line-height:1; }
         .drop-zone-main{ font-weight:700; color:var(--indigo); font-size:15px; }
         .drop-zone-sub{ color:var(--muted); font-size:12px; }
+        input[type="checkbox"]{ accent-color:var(--indigo); }
 
         /* ---- Tabs ---- */
         .tab-buttons{
@@ -1467,7 +1468,29 @@
             <div id="data" class="content">
                 <div class="header">
                     <h1>データ管理</h1>
-                    <p>バックアップと復元</p>
+                    <p>クラウド同期とバックアップ</p>
+                </div>
+
+                <div class="form-section" style="margin-bottom:20px;">
+                    <div class="form-title">☁️ クラウド同期</div>
+                    <p style="color:#888FA6; font-size:13px; margin-bottom:16px;">合言葉ひとつで、複数の端末から同じデータを呼び出せます。データは端末側で暗号化してから保存されるので、サーバーにも中身は見えません。</p>
+                    <div class="form-group">
+                        <label class="form-label">同期サーバーURL（Worker）</label>
+                        <input type="url" id="cloudUrl" class="form-control" placeholder="https://seven-pockets-sync.xxxx.workers.dev" autocapitalize="off" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">合言葉（パスフレーズ）</label>
+                        <input type="password" id="cloudPass" class="form-control" placeholder="長めの自分だけの合言葉" autocomplete="off">
+                    </div>
+                    <label style="display:flex; align-items:center; gap:8px; margin:2px 0 16px; cursor:pointer; color:var(--ink-soft); font-size:14px; font-weight:600;">
+                        <input type="checkbox" id="cloudAuto" onchange="Cloud.setAuto(this.checked)" style="width:18px; height:18px;">
+                        自動同期（開いたら読み込み・変更したら自動保存）
+                    </label>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="btn-primary" style="flex:1; min-width:150px;" onclick="Cloud.saveNow()">☁️ クラウドに保存</button>
+                        <button class="btn-primary" style="flex:1; min-width:150px; background:linear-gradient(135deg,#0E9E6B,#0B7E55); box-shadow:0 10px 20px -10px rgba(14,158,107,.6);" onclick="Cloud.loadNow()">⤓ クラウドから読み込み</button>
+                    </div>
+                    <div id="cloudStatus" style="margin-top:14px; font-size:13px; color:var(--muted);"></div>
                 </div>
                 
                 <div class="data-grid">
@@ -2614,6 +2637,190 @@
             showMessage('口座を削除しました');
         }
 
+        // 画面全体を再描画（クラウド読み込み後などに使用）
+        function renderAll() {
+            try { updateDisplay(); } catch (e) {}
+            try { updateRecurringLists(); } catch (e) {}
+            try { updateRevenueList(); } catch (e) {}
+            try { updateExpenseList(); } catch (e) {}
+            try { renderRevenueSelect(); } catch (e) {}
+            try { renderExpenseSelect(); } catch (e) {}
+            try { renderTargets(); } catch (e) {}
+            try { renderAccounts(); } catch (e) {}
+            try { updateCalendar(); } catch (e) {}
+        }
+
+        // ===== クラウド同期（Cloudflare Workers + KV / 端末側でAES暗号化）=====
+        const Cloud = {
+            _applying: false,
+            _ready: false,
+            _timer: null,
+
+            cfg() {
+                return {
+                    url: (localStorage.getItem('cloud_url') || '').trim(),
+                    pass: (localStorage.getItem('cloud_pass') || ''),
+                    auto: localStorage.getItem('cloud_auto') === '1'
+                };
+            },
+            setUrl(v) { localStorage.setItem('cloud_url', (v || '').trim()); },
+            setPass(v) { localStorage.setItem('cloud_pass', v || ''); },
+            configured() { const c = Cloud.cfg(); return !!(c.url && c.pass); },
+            status(msg, kind) {
+                const el = document.getElementById('cloudStatus');
+                if (!el) return;
+                el.textContent = msg;
+                el.style.color = kind === 'err' ? 'var(--coral)' : (kind === 'ok' ? 'var(--emerald)' : 'var(--muted)');
+            },
+            setAuto(on) {
+                localStorage.setItem('cloud_auto', on ? '1' : '0');
+                if (on) { Cloud.status('自動同期をオンにしました'); Cloud.loadNow(); }
+                else { Cloud.status('自動同期をオフにしました'); }
+            },
+
+            // ---- 暗号化（PBKDF2 + AES-GCM）----
+            async _keyId(pass) {
+                const d = new TextEncoder().encode('seven-pockets-id-v1:' + pass);
+                const h = await crypto.subtle.digest('SHA-256', d);
+                return [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, '0')).join('');
+            },
+            async _aesKey(pass) {
+                const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+                return crypto.subtle.deriveKey(
+                    { name: 'PBKDF2', salt: new TextEncoder().encode('seven-pockets-salt-v1'), iterations: 120000, hash: 'SHA-256' },
+                    km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+            },
+            _b64(u8) { let s = ''; u8.forEach(b => s += String.fromCharCode(b)); return btoa(s); },
+            _ub64(b64) { const s = atob(b64); const u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; },
+            async _encrypt(pass, obj) {
+                const key = await Cloud._aesKey(pass);
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify(obj)));
+                return JSON.stringify({ v: 1, iv: Cloud._b64(iv), ct: Cloud._b64(new Uint8Array(ct)) });
+            },
+            async _decrypt(pass, blobText) {
+                const blob = JSON.parse(blobText);
+                const key = await Cloud._aesKey(pass);
+                const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: Cloud._ub64(blob.iv) }, key, Cloud._ub64(blob.ct));
+                return JSON.parse(new TextDecoder().decode(pt));
+            },
+
+            _collect() {
+                return {
+                    daily_history: Storage.getDailyHistory(),
+                    recurring_income: Storage.getRecurringIncome(),
+                    recurring_expense: Storage.getRecurringExpense(),
+                    targets: Storage.getTargets(),
+                    accounts: Storage.getAccounts(),
+                    networth_history: Storage.getNetworthHistory(),
+                    holdings_log: Storage.getHoldingsLog(),
+                    revenue_items: Storage.getRevenueItems(),
+                    expense_items: Storage.getExpenseItems(),
+                    schema_version: 2,
+                    exported_at: new Date().toISOString()
+                };
+            },
+            _endpoint(id) { return Cloud.cfg().url.replace(/\/+$/, '') + '/d/' + id; },
+
+            async push() {
+                const c = Cloud.cfg();
+                if (!c.url || !c.pass) return false;
+                const id = await Cloud._keyId(c.pass);
+                const body = await Cloud._encrypt(c.pass, Cloud._collect());
+                const res = await fetch(Cloud._endpoint(id), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return true;
+            },
+            async pull() {
+                const c = Cloud.cfg();
+                if (!c.url || !c.pass) return null;
+                const id = await Cloud._keyId(c.pass);
+                const res = await fetch(Cloud._endpoint(id), { method: 'GET' });
+                if (res.status === 404) return null;
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const txt = await res.text();
+                if (!txt || txt === '{}') return null;
+                return Cloud._decrypt(c.pass, txt);
+            },
+
+            _apply(data) {
+                Cloud._applying = true;
+                try {
+                    Storage.setDailyHistory(data.daily_history || {});
+                    Storage.setRecurringIncome(data.recurring_income || []);
+                    Storage.setRecurringExpense(data.recurring_expense || []);
+                    Storage.setTargets(data.targets || {});
+                    if (data.accounts !== undefined) Storage.setAccounts(data.accounts || []);
+                    if (data.networth_history !== undefined) Storage.setNetworthHistory(data.networth_history || {});
+                    if (data.holdings_log !== undefined) Storage.setHoldingsLog(data.holdings_log || []);
+                    if (data.revenue_items !== undefined) Storage.setRevenueItems(data.revenue_items || []);
+                    if (data.expense_items !== undefined) Storage.setExpenseItems(data.expense_items || []);
+                    migrateSchema();
+                } finally { Cloud._applying = false; }
+                renderAll();
+            },
+
+            async saveNow() {
+                if (!Cloud.configured()) { Cloud.status('URLと合言葉を入力してください', 'err'); return; }
+                Cloud.status('保存中…');
+                try { await Cloud.push(); Cloud.status('保存しました（' + new Date().toLocaleString('ja-JP') + '）', 'ok'); showMessage('クラウドに保存しました'); }
+                catch (e) { Cloud.status('保存に失敗しました（' + e.message + '）', 'err'); }
+            },
+            async loadNow() {
+                if (!Cloud.configured()) { Cloud.status('URLと合言葉を入力してください', 'err'); return; }
+                Cloud.status('読み込み中…');
+                try {
+                    const data = await Cloud.pull();
+                    if (!data) { Cloud.status('クラウドにデータがありません（または合言葉が違います）'); return; }
+                    Cloud._apply(data);
+                    Cloud.status('読み込みました（' + new Date().toLocaleString('ja-JP') + '）', 'ok');
+                    showMessage('クラウドから読み込みました');
+                } catch (e) {
+                    Cloud.status('読み込みに失敗：合言葉が違うか通信エラーです', 'err');
+                }
+            },
+
+            onLocalChange() {
+                if (Cloud._applying || !Cloud._ready) return;
+                const c = Cloud.cfg();
+                if (!c.auto || !c.url || !c.pass) return;
+                clearTimeout(Cloud._timer);
+                Cloud._timer = setTimeout(() => {
+                    Cloud.push()
+                        .then(() => Cloud.status('自動保存しました（' + new Date().toLocaleString('ja-JP') + '）', 'ok'))
+                        .catch(() => Cloud.status('自動保存に失敗しました', 'err'));
+                }, 1500);
+            },
+
+            initUI() {
+                const c = Cloud.cfg();
+                const u = document.getElementById('cloudUrl');
+                if (u) { u.value = c.url; u.addEventListener('input', () => Cloud.setUrl(u.value)); }
+                const p = document.getElementById('cloudPass');
+                if (p) { p.value = c.pass; p.addEventListener('input', () => Cloud.setPass(p.value)); }
+                const a = document.getElementById('cloudAuto');
+                if (a) a.checked = c.auto;
+
+                if (c.auto && Cloud.configured()) {
+                    Cloud.status('自動同期：起動時の読み込み中…');
+                    Cloud.loadNow().finally(() => { Cloud._ready = true; });
+                } else {
+                    Cloud._ready = true;
+                    Cloud.status(Cloud.configured() ? '同期の準備ができています' : '未設定（URLと合言葉を入れると使えます）');
+                }
+            }
+        };
+
+        // Storage の保存をフックして、自動同期オン時に自動保存
+        ['setDailyHistory', 'setRecurringIncome', 'setRecurringExpense', 'setTargets', 'setAccounts', 'setNetworthHistory', 'setHoldingsLog', 'setRevenueItems', 'setExpenseItems'].forEach(fn => {
+            const orig = Storage[fn];
+            Storage[fn] = function (...args) {
+                const r = orig.apply(Storage, args);
+                try { Cloud.onLocalChange(); } catch (e) {}
+                return r;
+            };
+        });
+
         function exportData() {
             const data = {
                 daily_history: Storage.getDailyHistory(),
@@ -2714,6 +2921,7 @@
             renderExpenseSelect();
             renderTargets();
             renderAccounts();
+            Cloud.initUI();
             const hd = document.getElementById('holdDate');
             if (hd) hd.value = formatDate(new Date());
         });
