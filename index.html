@@ -974,6 +974,22 @@
         }
         .btn-link:hover{ color:var(--indigo); }
 
+        /* ---- Import drop zone ---- */
+        .drop-zone{
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            gap:4px; text-align:center; cursor:pointer;
+            padding:28px 16px;
+            background:rgba(91,80,193,.05);
+            border:1.5px dashed rgba(91,80,193,.4);
+            border-radius:var(--r-lg);
+            transition:background .15s var(--ease), border-color .15s var(--ease);
+        }
+        .drop-zone:hover{ background:rgba(91,80,193,.09); border-color:var(--indigo); }
+        .drop-zone.dragover{ background:rgba(91,80,193,.14); border-color:var(--indigo); border-style:solid; }
+        .drop-zone-icon{ font-size:30px; line-height:1; }
+        .drop-zone-main{ font-weight:700; color:var(--indigo); font-size:15px; }
+        .drop-zone-sub{ color:var(--muted); font-size:12px; }
+
         /* ---- Tabs ---- */
         .tab-buttons{
             gap:6px; background:var(--paper-2); padding:4px;
@@ -1462,11 +1478,26 @@
                     
                     <div class="form-section">
                         <div class="form-title">📤 インポート</div>
-                        <div class="form-group">
-                            <label class="form-label">JSONを貼り付け</label>
-                            <textarea id="importText" class="form-control" style="min-height: 100px; font-family: monospace; font-size: 12px;"></textarea>
+                        <p style="color:#888FA6; font-size:13px; margin-bottom:14px;">バックアップした <strong>.json</strong> ファイルを読み込みます（文字化けしません）。</p>
+
+                        <input type="file" id="importFileInput" accept=".json,application/json" style="display:none;" onchange="handleImportFileInput(this)">
+                        <div id="importDropZone" class="drop-zone"
+                             onclick="document.getElementById('importFileInput').click()"
+                             ondrop="handleImportDrop(event)"
+                             ondragover="handleImportDragOver(event)"
+                             ondragleave="handleImportDragLeave()">
+                            <div class="drop-zone-icon">📁</div>
+                            <div class="drop-zone-main">ファイルを選ぶ</div>
+                            <div class="drop-zone-sub">またはここに .json をドラッグ＆ドロップ</div>
                         </div>
-                        <button class="btn-primary" onclick="importData()">復元</button>
+
+                        <details style="margin-top:16px;">
+                            <summary style="cursor:pointer; color:#888FA6; font-size:13px; font-weight:600;">テキストを貼り付けて復元</summary>
+                            <div class="form-group" style="margin-top:12px;">
+                                <textarea id="importText" class="form-control" style="min-height: 100px; font-family: monospace; font-size: 12px;" placeholder='{ "daily_history": ... }'></textarea>
+                            </div>
+                            <button class="btn-primary" onclick="importData()">貼り付けた内容で復元</button>
+                        </details>
                     </div>
                 </div>
             </div>
@@ -2609,12 +2640,49 @@
         function importData() {
             const json = document.getElementById('importText').value;
             if (!json.trim()) {
-                alert('JSONを貼り付けてください');
+                alert('JSONを貼り付けるか、ファイルを選んでください');
                 return;
             }
-            
+            restoreFromJsonText(json);
+        }
+
+        // ファイルをUTF-8固定で読み込む（コピペの文字化けを根本から回避）
+        function importFromFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => restoreFromJsonText(e.target.result);
+            reader.onerror = () => alert('ファイルの読み込みに失敗しました');
+            reader.readAsText(file, 'utf-8');
+        }
+
+        function handleImportFileInput(input) {
+            if (input.files && input.files[0]) importFromFile(input.files[0]);
+            input.value = '';
+        }
+
+        function handleImportDrop(e) {
+            e.preventDefault();
+            const zone = document.getElementById('importDropZone');
+            if (zone) zone.classList.remove('dragover');
+            const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+            if (file) importFromFile(file);
+        }
+
+        function handleImportDragOver(e) {
+            e.preventDefault();
+            const zone = document.getElementById('importDropZone');
+            if (zone) zone.classList.add('dragover');
+        }
+
+        function handleImportDragLeave() {
+            const zone = document.getElementById('importDropZone');
+            if (zone) zone.classList.remove('dragover');
+        }
+
+        // 貼り付け・ファイルの両方が使う共通の復元処理
+        function restoreFromJsonText(text) {
             try {
-                const data = JSON.parse(json);
+                const data = JSON.parse(text);
                 Storage.setDailyHistory(data.daily_history || {});
                 Storage.setRecurringIncome(data.recurring_income || []);
                 Storage.setRecurringExpense(data.recurring_expense || []);
