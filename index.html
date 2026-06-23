@@ -127,7 +127,7 @@
             
             .bottom-nav {
                 display: grid;
-                grid-template-columns: repeat(5, 1fr);
+                grid-template-columns: repeat(6, 1fr);
                 position: fixed;
                 bottom: 0;
                 left: 0;
@@ -136,12 +136,13 @@
                 color: white;
                 z-index: 99;
                 box-shadow: 0 -4px 16px rgba(91, 80, 193, 0.2);
-                padding: 8px 4px;
-                gap: 2px;
+                padding: 6px 2px;
+                padding-bottom: max(6px, env(safe-area-inset-bottom));
+                gap: 0;
             }
             
             .bottom-nav-item {
-                padding: 8px 4px;
+                padding: 6px 2px;
                 text-align: center;
                 cursor: pointer;
                 border-top: 2px solid transparent;
@@ -149,7 +150,8 @@
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                gap: 2px;
+                gap: 3px;
+                border-radius: 10px;
             }
             
             .bottom-nav-item.active {
@@ -158,14 +160,16 @@
             }
             
             .nav-item-icon {
-                font-size: 22px;
+                font-size: 20px;
                 margin-right: 0;
+                line-height: 1;
             }
             
             .nav-item-label {
-                font-size: 9px;
+                font-size: 10px;
                 font-weight: 600;
-                line-height: 1.2;
+                line-height: 1.1;
+                white-space: nowrap;
             }
         }
         
@@ -886,8 +890,8 @@
                         <form onsubmit="handleRevenueItemSubmit(event)">
                             <div class="form-group">
                                 <label class="form-label">売上項目名</label>
-                                <div id="revenueItemChips" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
-                                <input type="text" id="revenueItemName" class="form-control" placeholder="例：愛しトーク、WAVE ORACLE">
+                                <select id="revenueItemSelect" class="form-control" onchange="onRevenueSelectChange()"></select>
+                                <input type="text" id="revenueItemNameNew" class="form-control" placeholder="新しい項目名を入力" style="display:none; margin-top:8px;">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">金額</label>
@@ -908,7 +912,8 @@
                         <form onsubmit="handleExpenseItemSubmit(event)">
                             <div class="form-group">
                                 <label class="form-label">支出項目名</label>
-                                <input type="text" id="expenseItemName" class="form-control" placeholder="例：食費、交通費">
+                                <select id="expenseItemSelect" class="form-control" onchange="onExpenseSelectChange()"></select>
+                                <input type="text" id="expenseItemNameNew" class="form-control" placeholder="新しい項目名を入力" style="display:none; margin-top:8px;">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">金額</label>
@@ -1230,27 +1235,27 @@
     <div class="bottom-nav" id="bottomNav">
         <div class="bottom-nav-item active" onclick="switchPage('dashboard')">
             <div class="nav-item-icon">📊</div>
-            <div class="nav-item-label">本日の<br>記録</div>
+            <div class="nav-item-label">記録</div>
         </div>
         <div class="bottom-nav-item" onclick="switchPage('calendar')">
             <div class="nav-item-icon">📅</div>
-            <div class="nav-item-label">カレン<br>ダー</div>
+            <div class="nav-item-label">カレンダー</div>
         </div>
         <div class="bottom-nav-item" onclick="switchPage('recurring')">
             <div class="nav-item-icon">🔄</div>
-            <div class="nav-item-label">定期<br>設定</div>
+            <div class="nav-item-label">定期</div>
         </div>
         <div class="bottom-nav-item" onclick="switchPage('targets')">
             <div class="nav-item-icon">🎯</div>
-            <div class="nav-item-label">月間<br>目標</div>
+            <div class="nav-item-label">目標</div>
         </div>
         <div class="bottom-nav-item" onclick="switchPage('accounts')">
             <div class="nav-item-icon">🏦</div>
-            <div class="nav-item-label">口座<br>資産</div>
+            <div class="nav-item-label">口座</div>
         </div>
         <div class="bottom-nav-item" onclick="switchPage('data')">
             <div class="nav-item-icon">💾</div>
-            <div class="nav-item-label">データ<br>管理</div>
+            <div class="nav-item-label">データ</div>
         </div>
     </div>
     
@@ -1392,6 +1397,21 @@
                     localStorage.setItem('revenue_items', JSON.stringify(data));
                 } catch (e) {
                     console.error('Failed to save revenue_items:', e);
+                }
+            },
+            getExpenseItems: () => {
+                try {
+                    return JSON.parse(localStorage.getItem('expense_items') || '[]');
+                } catch (e) {
+                    console.error('Failed to parse expense_items:', e);
+                    return [];
+                }
+            },
+            setExpenseItems: (data) => {
+                try {
+                    localStorage.setItem('expense_items', JSON.stringify(data));
+                } catch (e) {
+                    console.error('Failed to save expense_items:', e);
                 }
             },
         };
@@ -1604,11 +1624,13 @@
         function handleRevenueItemSubmit(e) {
             e.preventDefault();
             
-            const name = document.getElementById('revenueItemName').value.trim();
+            const sel = document.getElementById('revenueItemSelect');
+            const newInput = document.getElementById('revenueItemNameNew');
+            const name = (sel.value === '__new__' ? newInput.value.trim() : sel.value.trim());
             const amount = Number(document.getElementById('revenueItemAmount').value) || 0;
             
             if (!name) {
-                alert('項目名を入力してください');
+                alert('項目を選択するか、新しい項目名を入力してください');
                 return;
             }
             
@@ -1632,9 +1654,9 @@
             history[today].revenue.push({ name, amount });
             Storage.setDailyHistory(history);
             addRevenueItemName(name);
-            renderRevenueChips();
+            renderRevenueSelect(name);
             
-            document.getElementById('revenueItemName').value = '';
+            document.getElementById('revenueItemNameNew').value = '';
             document.getElementById('revenueItemAmount').value = '';
             
             updateRevenueList();
@@ -1651,21 +1673,63 @@
             }
         }
 
-        function renderRevenueChips() {
-            const el = document.getElementById('revenueItemChips');
-            if (!el) return;
-            const items = Storage.getRevenueItems();
-            if (!items.length) { el.innerHTML = ''; return; }
-            el.innerHTML = items.map((n, i) =>
-                `<button type="button" class="revenue-chip" onclick="pickRevenueItem(${i})">${escapeHtml(n)}</button>`
-            ).join('');
+        function addExpenseItemName(name) {
+            const items = Storage.getExpenseItems();
+            if (!items.includes(name)) {
+                items.push(name);
+                Storage.setExpenseItems(items);
+            }
         }
 
-        function pickRevenueItem(i) {
-            const name = Storage.getRevenueItems()[i];
-            if (name == null) return;
-            document.getElementById('revenueItemName').value = name;
-            document.getElementById('revenueItemAmount').focus();
+        // プルダウンの中身を作る（既存項目 ＋「新しい項目を追加」）
+        function buildItemOptions(items, selected) {
+            let html = '';
+            if (!items.length) {
+                html += '<option value="__new__">＋ 新しい項目を追加</option>';
+                return html;
+            }
+            html += '<option value="">項目を選択</option>';
+            html += items.map(n => `<option value="${escapeHtml(n)}"${n === selected ? ' selected' : ''}>${escapeHtml(n)}</option>`).join('');
+            html += '<option value="__new__">＋ 新しい項目を追加</option>';
+            return html;
+        }
+
+        function renderRevenueSelect(selected) {
+            const sel = document.getElementById('revenueItemSelect');
+            if (!sel) return;
+            sel.innerHTML = buildItemOptions(Storage.getRevenueItems(), selected);
+            onRevenueSelectChange();
+        }
+
+        function onRevenueSelectChange() {
+            const sel = document.getElementById('revenueItemSelect');
+            const newInput = document.getElementById('revenueItemNameNew');
+            if (!sel || !newInput) return;
+            if (sel.value === '__new__') {
+                newInput.style.display = 'block';
+                newInput.focus();
+            } else {
+                newInput.style.display = 'none';
+            }
+        }
+
+        function renderExpenseSelect(selected) {
+            const sel = document.getElementById('expenseItemSelect');
+            if (!sel) return;
+            sel.innerHTML = buildItemOptions(Storage.getExpenseItems(), selected);
+            onExpenseSelectChange();
+        }
+
+        function onExpenseSelectChange() {
+            const sel = document.getElementById('expenseItemSelect');
+            const newInput = document.getElementById('expenseItemNameNew');
+            if (!sel || !newInput) return;
+            if (sel.value === '__new__') {
+                newInput.style.display = 'block';
+                newInput.focus();
+            } else {
+                newInput.style.display = 'none';
+            }
         }
 
         function updateRevenueList() {
@@ -1718,11 +1782,13 @@
         function handleExpenseItemSubmit(e) {
             e.preventDefault();
             
-            const name = document.getElementById('expenseItemName').value.trim();
+            const sel = document.getElementById('expenseItemSelect');
+            const newInput = document.getElementById('expenseItemNameNew');
+            const name = (sel.value === '__new__' ? newInput.value.trim() : sel.value.trim());
             const amount = Number(document.getElementById('expenseItemAmount').value) || 0;
             
             if (!name) {
-                alert('項目名を入力してください');
+                alert('項目を選択するか、新しい項目名を入力してください');
                 return;
             }
             
@@ -1745,8 +1811,10 @@
             
             history[today].expense.push({ name, amount });
             Storage.setDailyHistory(history);
+            addExpenseItemName(name);
+            renderExpenseSelect(name);
             
-            document.getElementById('expenseItemName').value = '';
+            document.getElementById('expenseItemNameNew').value = '';
             document.getElementById('expenseItemAmount').value = '';
             
             updateExpenseList();
@@ -2026,6 +2094,17 @@
                 });
                 Storage.setRevenueItems([...names]);
             }
+            if (localStorage.getItem('expense_items') === null) {
+                // 既存の記録から支出項目名を拾って初期登録
+                const enames = new Set();
+                const hist2 = Storage.getDailyHistory();
+                Object.values(hist2).forEach(rec => {
+                    if (rec && Array.isArray(rec.expense)) {
+                        rec.expense.forEach(it => { if (it && it.name) enames.add(it.name); });
+                    }
+                });
+                Storage.setExpenseItems([...enames]);
+            }
         }
 
         function accountTypeLabel(type) {
@@ -2272,6 +2351,7 @@
                 networth_history: Storage.getNetworthHistory(),
                 holdings_log: Storage.getHoldingsLog(),
                 revenue_items: Storage.getRevenueItems(),
+                expense_items: Storage.getExpenseItems(),
                 schema_version: 2,
                 exported_at: new Date().toISOString()
             };
@@ -2303,6 +2383,7 @@
                 if (data.networth_history !== undefined) Storage.setNetworthHistory(data.networth_history || {});
                 if (data.holdings_log !== undefined) Storage.setHoldingsLog(data.holdings_log || []);
                 if (data.revenue_items !== undefined) Storage.setRevenueItems(data.revenue_items || []);
+                if (data.expense_items !== undefined) Storage.setExpenseItems(data.expense_items || []);
                 migrateSchema();
                 
                 updateDisplay();
@@ -2319,7 +2400,8 @@
             updateRecurringLists();
             updateRevenueList();
             updateExpenseList();
-            renderRevenueChips();
+            renderRevenueSelect();
+            renderExpenseSelect();
             renderTargets();
             renderAccounts();
             const hd = document.getElementById('holdDate');
