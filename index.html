@@ -1476,7 +1476,10 @@
                     <p style="color:#888FA6; font-size:13px; margin-bottom:16px;">合言葉ひとつで、複数の端末から同じデータを呼び出せます。データは端末側で暗号化してから保存されるので、サーバーにも中身は見えません。</p>
                     <div class="form-group">
                         <label class="form-label">合言葉（パスフレーズ）</label>
-                        <input type="password" id="cloudPass" class="form-control" placeholder="長めの自分だけの合言葉" autocomplete="off">
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" id="cloudPass" class="form-control" placeholder="長めの自分だけの合言葉（日本語OK）" autocomplete="off" autocapitalize="off" style="flex:1; -webkit-text-security:disc;">
+                            <button type="button" class="btn-danger" id="cloudPassToggle" onclick="togglePassVisible()" style="flex-shrink:0; padding:0 14px; background:var(--paper-2); color:var(--ink-soft);">表示</button>
+                        </div>
                     </div>
                     <label style="display:flex; align-items:center; gap:8px; margin:2px 0 16px; cursor:pointer; color:var(--ink-soft); font-size:14px; font-weight:600;">
                         <input type="checkbox" id="cloudAuto" onchange="Cloud.setAuto(this.checked)" style="width:18px; height:18px;">
@@ -2656,6 +2659,16 @@
         // ===== クラウド同期（Cloudflare Workers + KV / 端末側でAES暗号化）=====
         // デフォルトの同期サーバー（凌さんのWorker）。URL欄を空にしてもこれが使われます
         const DEFAULT_CLOUD_URL = 'https://seven-pockets-sync.ryo-i1020gold.workers.dev';
+
+        // 合言葉の表示/非表示（type=textのまま -webkit-text-security で隠す＝日本語IMEが使える）
+        function togglePassVisible() {
+            const inp = document.getElementById('cloudPass');
+            const btn = document.getElementById('cloudPassToggle');
+            if (!inp) return;
+            const hidden = inp.style.webkitTextSecurity !== 'none';
+            inp.style.webkitTextSecurity = hidden ? 'none' : 'disc';
+            if (btn) btn.textContent = hidden ? '隠す' : '表示';
+        }
 
         const Cloud = {
             _applying: false,
